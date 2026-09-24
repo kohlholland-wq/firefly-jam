@@ -1,0 +1,1067 @@
+<title>Firefly Jam</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Figtree:wght@400;600&family=Martian+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --night: #0e1630;
+    --dusk: #2a2555;
+    --moon: #f3ecd2;
+    --moon-dim: rgba(243, 236, 210, 0.62);
+    --amber: #ffc65c;
+    --teal: #7fe0cf;
+    --rose: #f4a3c0;
+    --lilac: #c4b2ff;
+    --static: #ff5d8f;
+    --panel: rgba(14, 22, 48, 0.72);
+    --display: "Shrikhand", "Georgia", serif;
+    --body: "Figtree", "Segoe UI", system-ui, sans-serif;
+    --mono: "Martian Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  html, body { height: 100%; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    background: var(--night);
+    color: var(--moon);
+    font-family: var(--body);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #scene {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+    cursor: none;
+  }
+  .lbl {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--moon-dim);
+  }
+  .hud {
+    position: fixed;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+    pointer-events: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .hud.top { top: 0; padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
+  .hud.bottom { bottom: 0; padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px)); align-items: flex-end; }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat b { font-family: var(--mono); font-weight: 600; font-size: 22px; line-height: 1.1; }
+  .score-row { display: flex; align-items: baseline; gap: 10px; }
+  #mult { font-family: var(--mono); font-size: 13px; color: var(--amber); }
+  .right { display: flex; align-items: center; gap: 14px; }
+  #lives { display: flex; gap: 6px; }
+  #lives i {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 10px var(--amber);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  #lives i.gone { opacity: 0.15; box-shadow: none; transform: scale(0.7); }
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+  #mute {
+    pointer-events: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: transparent;
+    border: 1px solid rgba(243, 236, 210, 0.3);
+    border-radius: 999px;
+    padding: 6px 12px;
+  }
+  #mute:focus-visible, .play:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+  #layers {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+  #layers li {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(243, 236, 210, 0.18);
+    color: rgba(243, 236, 210, 0.4);
+    transition: all 0.4s;
+  }
+  #layers li.on {
+    color: var(--night);
+    background: var(--teal);
+    border-color: var(--teal);
+    box-shadow: 0 0 14px rgba(127, 224, 207, 0.55);
+  }
+  #layers li small { opacity: 0.7; margin-left: 4px; font-size: 9px; }
+  .stat.end { align-items: flex-end; text-align: right; }
+  #toast {
+    position: fixed;
+    left: 50%;
+    top: 22%;
+    transform: translate(-50%, 10px);
+    font-family: var(--display);
+    font-size: clamp(22px, 5vw, 34px);
+    color: var(--teal);
+    text-shadow: 0 0 18px rgba(127, 224, 207, 0.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s, transform 0.5s;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .overlay {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding-inline: 16px;
+    background: radial-gradient(ellipse at center, rgba(14, 22, 48, 0.35), rgba(14, 22, 48, 0.8));
+  }
+  .card {
+    max-width: 440px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .card h1, .card h2 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 400;
+    line-height: 1;
+    color: var(--amber);
+    text-shadow: 0 0 28px rgba(255, 198, 92, 0.45);
+    text-wrap: balance;
+  }
+  .card h1 { font-size: clamp(48px, 13vw, 84px); }
+  .card h2 { font-size: clamp(34px, 9vw, 52px); }
+  .card p { margin: 0; font-size: 16px; line-height: 1.55; color: var(--moon); text-wrap: pretty; }
+  .card .how { font-size: 14px; color: var(--moon-dim); }
+  .legend { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; font-size: 13px; color: var(--moon-dim); }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .dot.note { background: var(--teal); box-shadow: 0 0 10px var(--teal); }
+  .dot.bad { background: #3a2f52; box-shadow: 0 0 0 2px var(--static); border-radius: 3px; transform: rotate(45deg); width: 10px; height: 10px; }
+  .play {
+    margin-top: 6px;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--night);
+    background: var(--amber);
+    border: 0;
+    border-radius: 999px;
+    padding: 14px 28px;
+    box-shadow: 0 0 30px rgba(255, 198, 92, 0.45);
+    transition: transform 0.15s;
+  }
+  .play:hover { transform: scale(1.04); }
+  .final { display: flex; gap: 32px; justify-content: center; }
+  .final b { font-family: var(--mono); font-size: 30px; font-weight: 600; }
+  @media (max-width: 560px) {
+    .hud.bottom { flex-wrap: wrap; justify-content: center; }
+    .hud.bottom .stat { display: none; }
+    .stat b { font-size: 18px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #toast, #layers li, .play { transition: none; }
+  }
+</style>
+
+<canvas id="scene" aria-label="Firefly Jam play field"></canvas>
+
+<div class="hud top">
+  <div class="stat">
+    <span class="lbl">Score</span>
+    <div class="score-row"><b id="score">0</b><span id="mult">×1</span></div>
+  </div>
+  <div class="right">
+    <div id="lives" aria-label="Lives"><i></i><i></i><i></i></div>
+    <button id="mute" type="button">Sound on</button>
+  </div>
+</div>
+
+<div class="hud bottom">
+  <div class="stat"><span class="lbl">Chord</span><b id="chord">Am</b></div>
+  <ol id="layers" aria-label="Instruments playing">
+    <li class="on">Pad</li>
+    <li>Kick<small>10</small></li>
+    <li>Hats<small>25</small></li>
+    <li>Bass<small>45</small></li>
+    <li>Arp<small>70</small></li>
+  </ol>
+  <div class="stat end"><span class="lbl">Bar · Beat</span><b id="pos">1 · 1</b></div>
+</div>
+
+<div id="toast"></div>
+
+<div class="overlay" id="title-screen">
+  <div class="card">
+    <h1>Firefly Jam</h1>
+    <p>Catch the glowing notes and each one chimes in on the beat. Score higher and the band joins in, one instrument at a time.</p>
+    <div class="legend">
+      <span><i class="dot note"></i>Catch notes</span>
+      <span><i class="dot bad"></i>Dodge static</span>
+    </div>
+    <p class="how">Move with your mouse, finger, or arrow keys. Sound on for the full effect.</p>
+    <button class="play" id="start" type="button">Start the jam</button>
+    <span class="lbl" id="best-title"></span>
+  </div>
+</div>
+
+<div class="overlay" id="over-screen" hidden>
+  <div class="card">
+    <h2>The meadow goes quiet</h2>
+    <div class="final">
+      <div class="stat"><span class="lbl">Score</span><b id="final-score">0</b></div>
+      <div class="stat"><span class="lbl">Best</span><b id="final-best">0</b></div>
+    </div>
+    <p class="how" id="over-note"></p>
+    <button class="play" id="again" type="button">Play again</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ---------- Music setup ----------
+  const BPM = 96;
+  const STEP = 60 / BPM / 4; // one sixteenth note, in seconds
+  const CHORDS = [
+    { name: "Am", tones: [57, 60, 64], bass: 45 },
+    { name: "F",  tones: [53, 57, 60], bass: 41 },
+    { name: "C",  tones: [55, 60, 64], bass: 48 },
+    { name: "G",  tones: [55, 59, 62], bass: 43 },
+  ];
+  const LAYERS = [
+    { name: "Pad", at: 0 },
+    { name: "Kick", at: 10 },
+    { name: "Hats", at: 25 },
+    { name: "Bass", at: 45 },
+    { name: "Arp", at: 70 },
+  ];
+  const BASS_STEPS = [0, 3, 6, 8, 10, 14];
+  const ARP_ORDER = [0, 1, 2, 3, 2, 1, 0, 1];
+
+  const chordAt = (step) => CHORDS[Math.floor(step / 32) % CHORDS.length];
+  const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
+
+  let ac = null, master, delaySend, noiseBuf;
+  let audioStart = 0, nextStepTime = 0, stepIndex = 0;
+  let musicLayer = 0, muted = false;
+  const events = []; // visual cues scheduled on the audio clock
+
+  function initAudio() {
+    if (ac) { ac.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    ac = new AC();
+
+    const comp = ac.createDynamicsCompressor();
+    comp.threshold.value = -14;
+    comp.ratio.value = 4;
+    master = ac.createGain();
+    master.gain.value = muted ? 0 : 0.8;
+    master.connect(comp);
+    comp.connect(ac.destination);
+
+    // A dotted-eighth echo that the chimes and arp feed into
+    const delay = ac.createDelay(1);
+    delay.delayTime.value = STEP * 3;
+    const feedback = ac.createGain();
+    feedback.gain.value = 0.38;
+    const tone = ac.createBiquadFilter();
+    tone.type = "lowpass";
+    tone.frequency.value = 2600;
+    delaySend = ac.createGain();
+    delaySend.gain.value = 1;
+    delaySend.connect(delay);
+    delay.connect(tone);
+    tone.connect(feedback);
+    feedback.connect(delay);
+    tone.connect(master);
+
+    noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+    const data = noiseBuf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+
+    audioStart = ac.currentTime + 0.1;
+    nextStepTime = audioStart;
+    stepIndex = 0;
+    setInterval(scheduler, 25);
+  }
+
+  function scheduler() {
+    if (!ac || ac.state !== "running") return;
+    // If the page stalled, jump ahead instead of playing a burst of late notes
+    if (nextStepTime < ac.currentTime - 0.05) {
+      const skip = Math.ceil((ac.currentTime - nextStepTime) / STEP);
+      stepIndex += skip;
+      nextStepTime += skip * STEP;
+    }
+    while (nextStepTime < ac.currentTime + 0.12) {
+      scheduleStep(stepIndex, nextStepTime);
+      stepIndex++;
+      nextStepTime += STEP;
+    }
+  }
+
+  function scheduleStep(i, t) {
+    const s = i % 16;
+    const chord = chordAt(i);
+    if (i % 32 === 0) {
+      pad(chord, t, STEP * 32);
+      events.push({ t, type: "chord", chord });
+    }
+    if (musicLayer >= 1 && s % 4 === 0) {
+      kick(t);
+      events.push({ t, type: "kick" });
+    }
+    if (musicLayer >= 2) {
+      if (s % 4 === 2) hat(t, 0.09, 0.05);
+      else if (s === 15 || s === 7) hat(t, 0.04, 0.03);
+    }
+    if (musicLayer >= 3 && BASS_STEPS.includes(s)) {
+      bass(chord.bass + (s === 10 ? 12 : 0), t, STEP * 1.7);
+    }
+    if (musicLayer >= 4 && s % 2 === 0) {
+      const k = ARP_ORDER[(s / 2) % ARP_ORDER.length];
+      const m = k === 3 ? chord.tones[0] + 12 : chord.tones[k];
+      pluck(mtof(m + 12), t, 0.06);
+    }
+  }
+
+  function envGain(t, peak, attack, release) {
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + attack + release);
+    return g;
+  }
+
+  function pad(chord, t, dur) {
+    const filter = ac.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 850;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.045, t + 1.4);
+    g.gain.setValueAtTime(0.045, t + dur - 0.2);
+    g.gain.linearRampToValueAtTime(0.0001, t + dur + 1.2);
+    filter.connect(g);
+    g.connect(master);
+    const notes = [chord.tones[0] - 12, ...chord.tones];
+    notes.forEach((m) => {
+      [-7, 7].forEach((detune) => {
+        const o = ac.createOscillator();
+        o.type = "sawtooth";
+        o.frequency.value = mtof(m);
+        o.detune.value = detune;
+        o.connect(filter);
+        o.start(t);
+        o.stop(t + dur + 1.3);
+      });
+    });
+  }
+
+  function kick(t) {
+    const o = ac.createOscillator();
+    o.type = "sine";
+    o.frequency.setValueAtTime(140, t);
+    o.frequency.exponentialRampToValueAtTime(42, t + 0.14);
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.9, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+    o.connect(g);
+    g.connect(master);
+    o.start(t);
+    o.stop(t + 0.42);
+  }
+
+  function hat(t, vol, len) {
+    const src = ac.createBufferSource();
+    src.buffer = noiseBuf;
+    const hp = ac.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 7000;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    src.connect(hp);
+    hp.connect(g);
+    g.connect(master);
+    src.start(t, Math.random() * 0.5);
+    src.stop(t + len + 0.01);
+  }
+
+  function bass(m, t, dur) {
+    const o = ac.createOscillator();
+    o.type = "sawtooth";
+    o.frequency.value = mtof(m);
+    const f = ac.createBiquadFilter();
+    f.type = "lowpass";
+    f.Q.value = 6;
+    f.frequency.setValueAtTime(900, t);
+    f.frequency.exponentialRampToValueAtTime(220, t + dur);
+    const g = envGain(t, 0.2, 0.01, dur);
+    o.connect(f);
+    f.connect(g);
+    g.connect(master);
+    o.start(t);
+    o.stop(t + dur + 0.05);
+  }
+
+  function pluck(freq, t, vol) {
+    const o = ac.createOscillator();
+    o.type = "triangle";
+    o.frequency.value = freq;
+    const g = envGain(t, vol, 0.005, 0.3);
+    o.connect(g);
+    g.connect(master);
+    g.connect(delaySend);
+    o.start(t);
+    o.stop(t + 0.35);
+  }
+
+  function bell(freq, t, vol = 0.22) {
+    const out = envGain(t, vol, 0.004, 1.3);
+    out.connect(master);
+    const send = ac.createGain();
+    send.gain.value = 0.45;
+    out.connect(send);
+    send.connect(delaySend);
+    [[1, 1], [2, 0.3], [3.01, 0.12]].forEach(([ratio, amp]) => {
+      const o = ac.createOscillator();
+      o.type = "sine";
+      o.frequency.value = freq * ratio;
+      const g = ac.createGain();
+      g.gain.value = amp;
+      o.connect(g);
+      g.connect(out);
+      o.start(t);
+      o.stop(t + 1.4);
+    });
+  }
+
+  function crunch(t) {
+    const src = ac.createBufferSource();
+    src.buffer = noiseBuf;
+    const bp = ac.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.Q.value = 2;
+    bp.frequency.setValueAtTime(1600, t);
+    bp.frequency.exponentialRampToValueAtTime(180, t + 0.45);
+    const g = envGain(t, 0.5, 0.005, 0.45);
+    src.connect(bp);
+    bp.connect(g);
+    g.connect(master);
+    src.start(t);
+    src.stop(t + 0.5);
+    [110, 116.5].forEach((f) => {
+      const o = ac.createOscillator();
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(f, t);
+      o.frequency.exponentialRampToValueAtTime(f * 0.6, t + 0.5);
+      const og = envGain(t, 0.12, 0.005, 0.5);
+      o.connect(og);
+      og.connect(master);
+      o.start(t);
+      o.stop(t + 0.55);
+    });
+  }
+
+  // Returns the time and step number of the next sixteenth note, so catches land on the grid
+  function nextGridSlot() {
+    const n = Math.ceil((ac.currentTime - audioStart) / STEP + 0.02);
+    return { t: audioStart + n * STEP, step: n };
+  }
+
+  function playCatch(streak) {
+    if (!ac) return;
+    const { t, step } = nextGridSlot();
+    const tones = chordAt(step).tones;
+    const ladder = [...tones, ...tones.map((m) => m + 12), tones[0] + 24];
+    bell(mtof(ladder[(streak - 1) % ladder.length] + 12), t);
+  }
+
+  function playFarewell() {
+    if (!ac) return;
+    const { t, step } = nextGridSlot();
+    const tones = chordAt(step).tones;
+    [tones[2] + 12, tones[1] + 12, tones[0] + 12, tones[0]].forEach((m, k) => bell(mtof(m), t + k * STEP * 2, 0.16));
+  }
+
+  // ---------- Drawing setup ----------
+  const cv = document.getElementById("scene");
+  const g = cv.getContext("2d");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W = 0, H = 0, DPR = 1;
+  let sky, stars = [], grassBack = [], grassFront = [], hills = [];
+
+  const COLORS = {
+    notes: ["#7fe0cf", "#f4a3c0", "#c4b2ff"],
+    amber: "#ffc65c",
+    moon: "#f3ecd2",
+    static: "#ff5d8f",
+  };
+
+  function glowSprite(color, size) {
+    const c = document.createElement("canvas");
+    c.width = c.height = size * 2;
+    const x = c.getContext("2d");
+    const grad = x.createRadialGradient(size, size, 0, size, size, size);
+    grad.addColorStop(0, "#ffffff");
+    grad.addColorStop(0.12, color);
+    grad.addColorStop(0.4, color + "55");
+    grad.addColorStop(1, color + "00");
+    x.fillStyle = grad;
+    x.fillRect(0, 0, size * 2, size * 2);
+    return c;
+  }
+  const noteGlow = COLORS.notes.map((c) => glowSprite(c, 48));
+  const fireflyGlow = glowSprite(COLORS.amber, 64);
+  const staticGlow = glowSprite(COLORS.static, 40);
+
+  function resize() {
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    cv.width = Math.round(W * DPR);
+    cv.height = Math.round(H * DPR);
+    g.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    sky = g.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, "#0b1229");
+    sky.addColorStop(0.65, "#1a2150");
+    sky.addColorStop(1, "#2a2555");
+
+    stars = Array.from({ length: Math.round((W * H) / 5000) }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H * 0.7,
+      r: Math.random() * 1.2 + 0.3,
+      tw: Math.random() * Math.PI * 2,
+    }));
+
+    hills = [];
+    for (let x = 0; x <= W + 20; x += 20) {
+      hills.push(H * 0.8 - Math.sin(x * 0.004) * 30 - Math.sin(x * 0.011 + 1) * 14);
+    }
+
+    const blades = (count, minH, maxH) => Array.from({ length: count }, () => ({
+      x: Math.random() * W,
+      h: minH + Math.random() * (maxH - minH),
+      phase: Math.random() * Math.PI * 2,
+      lean: (Math.random() - 0.5) * 10,
+    }));
+    grassBack = blades(Math.round(W / 5), 20, 60);
+    grassFront = blades(Math.round(W / 7), 30, 90);
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  // ---------- Game state ----------
+  const BEST_KEY = "fireflyjam.best";
+  const loadBest = () => { try { return Number(localStorage.getItem(BEST_KEY)) || 0; } catch { return 0; } };
+  const saveBest = (v) => { try { localStorage.setItem(BEST_KEY, String(v)); } catch {} };
+
+  const state = {
+    mode: "title",
+    score: 0,
+    lives: 3,
+    streak: 0,
+    mult: 1,
+    best: loadBest(),
+    orbs: [],
+    hazards: [],
+    sparks: [],
+    rings: [],
+    floats: [],
+    orbTimer: 0,
+    hazardTimer: 3,
+    invincible: 0,
+    shake: 0,
+    pulse: 0,
+    time: 0,
+  };
+  const player = { x: W / 2, y: H / 2, tx: W / 2, ty: H / 2, r: 11, trail: [] };
+  const keys = new Set();
+
+  const $ = (id) => document.getElementById(id);
+  const hud = {
+    score: $("score"), mult: $("mult"), chord: $("chord"), pos: $("pos"),
+    lives: [...document.querySelectorAll("#lives i")],
+    layers: [...document.querySelectorAll("#layers li")],
+    toast: $("toast"),
+  };
+  let toastTimer = 0;
+
+  function showToast(text) {
+    hud.toast.textContent = text;
+    hud.toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => hud.toast.classList.remove("show"), 2200);
+  }
+
+  function updateBestLabel() {
+    $("best-title").textContent = state.best > 0 ? `Best score: ${state.best}` : "";
+  }
+  updateBestLabel();
+
+  function setLayer(n, announce) {
+    if (n === musicLayer) return;
+    if (announce && n > musicLayer) showToast(`${LAYERS[n].name} joins in`);
+    musicLayer = n;
+    hud.layers.forEach((li, k) => li.classList.toggle("on", k <= n));
+  }
+
+  function refreshHud() {
+    hud.score.textContent = state.score;
+    hud.mult.textContent = `×${state.mult}`;
+    hud.lives.forEach((el, k) => el.classList.toggle("gone", k >= state.lives));
+  }
+
+  function startGame() {
+    initAudio();
+    Object.assign(state, {
+      mode: "play", score: 0, lives: 3, streak: 0, mult: 1,
+      hazards: [], orbTimer: 0.3, hazardTimer: 3, invincible: 0, shake: 0,
+    });
+    player.x = player.tx = W / 2;
+    player.y = player.ty = H / 2;
+    player.trail = [];
+    setLayer(0, false);
+    refreshHud();
+    $("title-screen").hidden = true;
+    $("over-screen").hidden = true;
+    cv.focus?.();
+  }
+
+  function endGame() {
+    state.mode = "over";
+    playFarewell();
+    setLayer(0, false);
+    const newBest = state.score > state.best;
+    if (newBest) { state.best = state.score; saveBest(state.best); }
+    $("final-score").textContent = state.score;
+    $("final-best").textContent = state.best;
+    $("over-note").textContent = newBest && state.score > 0
+      ? "New best! The fireflies will remember that one."
+      : `Reach ${nextGoal()} to bring in the next instrument.`;
+    updateBestLabel();
+    $("over-screen").hidden = false;
+    $("again").focus();
+  }
+
+  function nextGoal() {
+    const next = LAYERS.find((l) => l.at > state.score);
+    return next ? `${next.at} points` : "a new high score";
+  }
+
+  $("start").addEventListener("click", startGame);
+  $("again").addEventListener("click", startGame);
+  $("mute").addEventListener("click", toggleMute);
+
+  function toggleMute() {
+    muted = !muted;
+    $("mute").textContent = muted ? "Sound off" : "Sound on";
+    if (master) master.gain.setTargetAtTime(muted ? 0 : 0.8, ac.currentTime, 0.05);
+  }
+
+  // ---------- Input ----------
+  cv.addEventListener("pointermove", (e) => {
+    player.tx = e.clientX;
+    player.ty = e.clientY - (e.pointerType === "touch" ? 50 : 0);
+  });
+  cv.addEventListener("pointerdown", (e) => {
+    player.tx = e.clientX;
+    player.ty = e.clientY - (e.pointerType === "touch" ? 50 : 0);
+  });
+  window.addEventListener("keydown", (e) => {
+    if (e.key.startsWith("Arrow") || "wasd".includes(e.key.toLowerCase()) && e.key.length === 1) {
+      keys.add(e.key.toLowerCase());
+      if (state.mode === "play") e.preventDefault();
+    }
+    if (e.key.toLowerCase() === "m" && !e.repeat) toggleMute();
+    if ((e.key === "Enter" || e.key === " ") && state.mode !== "play" && document.activeElement?.tagName !== "BUTTON") {
+      e.preventDefault();
+      startGame();
+    }
+  });
+  window.addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()));
+
+  let paused = false;
+  document.addEventListener("visibilitychange", () => {
+    paused = document.hidden;
+    if (!ac) return;
+    if (paused) ac.suspend(); else ac.resume();
+  });
+
+  // ---------- Spawning ----------
+  function fromEdge(speed) {
+    const side = Math.floor(Math.random() * 4);
+    const m = 30;
+    let x, y;
+    if (side === 0) { x = Math.random() * W; y = -m; }
+    else if (side === 1) { x = W + m; y = Math.random() * H * 0.85; }
+    else if (side === 2) { x = Math.random() * W; y = H + m; }
+    else { x = -m; y = Math.random() * H * 0.85; }
+    const aimX = W * (0.2 + Math.random() * 0.6);
+    const aimY = H * (0.15 + Math.random() * 0.6);
+    const a = Math.atan2(aimY - y, aimX - x);
+    return { x, y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed };
+  }
+
+  function spawnOrb() {
+    if (state.orbs.length > 14) return;
+    state.orbs.push({
+      ...fromEdge(35 + Math.random() * 35),
+      r: 9,
+      tone: Math.floor(Math.random() * 3),
+      wobble: Math.random() * Math.PI * 2,
+      age: 0,
+    });
+  }
+
+  function spawnHazard() {
+    const speed = 55 + Math.min(110, state.score * 1.1) + Math.random() * 25;
+    state.hazards.push({ ...fromEdge(speed), r: 14, spin: Math.random() * 6, age: 0 });
+  }
+
+  const offscreen = (o) => o.age > 1 && (o.x < -80 || o.x > W + 80 || o.y < -80 || o.y > H + 80);
+
+  function burst(x, y, color, count, speed) {
+    for (let i = 0; i < count; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const s = speed * (0.4 + Math.random() * 0.8);
+      state.sparks.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, color });
+    }
+  }
+
+  // ---------- Update ----------
+  function update(dt) {
+    state.time += dt;
+    state.pulse = Math.max(0, state.pulse - dt * 3.5);
+    state.shake = Math.max(0, state.shake - dt * 30);
+    state.invincible = Math.max(0, state.invincible - dt);
+
+    // Visual cues timed to the audio clock
+    if (ac) {
+      while (events.length && events[0].t <= ac.currentTime) {
+        const ev = events.shift();
+        if (ev.type === "kick") state.pulse = 1;
+        if (ev.type === "chord") hud.chord.textContent = ev.chord.name;
+      }
+      const n = Math.max(0, Math.floor((ac.currentTime - audioStart) / STEP));
+      const pos = `${Math.floor(n / 16) + 1} · ${Math.floor((n % 16) / 4) + 1}`;
+      if (hud.pos.textContent !== pos) hud.pos.textContent = pos;
+    }
+
+    state.orbTimer -= dt;
+    if (state.orbTimer <= 0) {
+      spawnOrb();
+      state.orbTimer = state.mode === "play" ? 0.6 + Math.random() * 0.5 : 1.1 + Math.random();
+    }
+
+    if (state.mode === "play") {
+      state.hazardTimer -= dt;
+      if (state.hazardTimer <= 0) {
+        spawnHazard();
+        state.hazardTimer = Math.max(0.8, 3 - state.score * 0.025) * (0.7 + Math.random() * 0.6);
+      }
+
+      let kx = 0, ky = 0;
+      if (keys.has("arrowleft") || keys.has("a")) kx -= 1;
+      if (keys.has("arrowright") || keys.has("d")) kx += 1;
+      if (keys.has("arrowup") || keys.has("w")) ky -= 1;
+      if (keys.has("arrowdown") || keys.has("s")) ky += 1;
+      if (kx || ky) {
+        const len = Math.hypot(kx, ky);
+        player.tx = player.x + (kx / len) * 60;
+        player.ty = player.y + (ky / len) * 60;
+      }
+      player.tx = Math.min(W - 12, Math.max(12, player.tx));
+      player.ty = Math.min(H - 12, Math.max(12, player.ty));
+      const ease = Math.min(1, dt * (kx || ky ? 6 : 12));
+      player.x += (player.tx - player.x) * ease;
+      player.y += (player.ty - player.y) * ease;
+      player.trail.push({ x: player.x, y: player.y });
+      if (player.trail.length > 18) player.trail.shift();
+    }
+
+    for (const o of state.orbs) {
+      o.age += dt;
+      o.wobble += dt * 2;
+      o.x += o.vx * dt + Math.cos(o.wobble) * 0.3;
+      o.y += o.vy * dt + Math.sin(o.wobble * 1.3) * 0.3;
+    }
+    for (const h of state.hazards) {
+      h.age += dt;
+      h.spin += dt * 3;
+      h.x += h.vx * dt;
+      h.y += h.vy * dt;
+    }
+
+    if (state.mode === "play") {
+      state.orbs = state.orbs.filter((o) => {
+        if (Math.hypot(o.x - player.x, o.y - player.y) > o.r + player.r + 6) return true;
+        catchOrb(o);
+        return false;
+      });
+      if (state.invincible <= 0) {
+        for (const h of state.hazards) {
+          if (Math.hypot(h.x - player.x, h.y - player.y) < h.r + player.r - 4) {
+            getHit(h);
+            break;
+          }
+        }
+      }
+    }
+    state.orbs = state.orbs.filter((o) => !offscreen(o));
+    state.hazards = state.hazards.filter((h) => !offscreen(h));
+
+    for (const s of state.sparks) {
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      s.vx *= 0.94;
+      s.vy *= 0.94;
+      s.life -= dt * 1.6;
+    }
+    state.sparks = state.sparks.filter((s) => s.life > 0);
+    for (const r of state.rings) r.life -= dt * 1.8;
+    state.rings = state.rings.filter((r) => r.life > 0);
+    for (const f of state.floats) { f.y -= dt * 30; f.life -= dt; }
+    state.floats = state.floats.filter((f) => f.life > 0);
+  }
+
+  function catchOrb(o) {
+    state.streak++;
+    state.mult = 1 + Math.min(3, Math.floor(state.streak / 6));
+    state.score += state.mult;
+    playCatch(state.streak);
+    const color = COLORS.notes[o.tone];
+    burst(o.x, o.y, color, 14, 140);
+    state.rings.push({ x: o.x, y: o.y, life: 1, color });
+    state.floats.push({ x: o.x, y: o.y - 14, text: `+${state.mult}`, life: 0.9, color });
+    let layer = 0;
+    LAYERS.forEach((l, k) => { if (state.score >= l.at) layer = k; });
+    setLayer(layer, true);
+    refreshHud();
+  }
+
+  function getHit(h) {
+    state.lives--;
+    state.streak = 0;
+    state.mult = 1;
+    state.invincible = 1.6;
+    state.shake = reduceMotion ? 0 : 14;
+    if (ac) crunch(ac.currentTime);
+    burst(player.x, player.y, COLORS.static, 22, 220);
+    h.age = 99;
+    h.x = -1000; // remove the blob that hit you
+    refreshHud();
+    if (state.lives <= 0) endGame();
+  }
+
+  // ---------- Draw ----------
+  function drawBackground() {
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, H);
+
+    for (const s of stars) {
+      const a = 0.35 + 0.35 * Math.sin(state.time * 1.5 + s.tw);
+      g.globalAlpha = a;
+      g.fillStyle = COLORS.moon;
+      g.fillRect(s.x, s.y, s.r, s.r);
+    }
+    g.globalAlpha = 1;
+
+    // Moon
+    const mx = W * 0.82, my = H * 0.18, mr = Math.min(W, H) * 0.05 + 10;
+    const moonHalo = g.createRadialGradient(mx, my, mr * 0.8, mx, my, mr * 4);
+    moonHalo.addColorStop(0, "rgba(243,236,210,0.18)");
+    moonHalo.addColorStop(1, "rgba(243,236,210,0)");
+    g.fillStyle = moonHalo;
+    g.fillRect(mx - mr * 4, my - mr * 4, mr * 8, mr * 8);
+    // Crescent: clip away a circle so the halo shows through the dark side
+    g.save();
+    g.beginPath();
+    g.rect(0, 0, W, H);
+    g.arc(mx - mr * 0.45, my - mr * 0.2, mr * 0.92, 0, Math.PI * 2, true);
+    g.clip();
+    g.fillStyle = COLORS.moon;
+    g.beginPath();
+    g.arc(mx, my, mr, 0, Math.PI * 2);
+    g.fill();
+    g.restore();
+
+    // Hills
+    g.fillStyle = "#141a3d";
+    g.beginPath();
+    g.moveTo(0, H);
+    hills.forEach((y, k) => g.lineTo(k * 20, y));
+    g.lineTo(W, H);
+    g.closePath();
+    g.fill();
+
+    drawGrass(grassBack, "#10163a", 0.6);
+  }
+
+  function drawGrass(blades, color, sway) {
+    g.strokeStyle = color;
+    g.lineWidth = 2;
+    g.lineCap = "round";
+    const beat = reduceMotion ? 0 : state.pulse * 6;
+    g.beginPath();
+    for (const b of blades) {
+      const bend = Math.sin(state.time * 1.2 + b.phase) * (4 + beat) * sway + b.lean;
+      g.moveTo(b.x, H + 2);
+      g.quadraticCurveTo(b.x + bend * 0.3, H - b.h * 0.5, b.x + bend, H - b.h);
+    }
+    g.stroke();
+  }
+
+  function drawOrbs() {
+    g.globalCompositeOperation = "lighter";
+    for (const o of state.orbs) {
+      const size = 34 + state.pulse * 10 + Math.sin(o.wobble * 2) * 3;
+      g.drawImage(noteGlow[o.tone], o.x - size, o.y - size, size * 2, size * 2);
+    }
+    g.globalCompositeOperation = "source-over";
+  }
+
+  function drawHazards() {
+    for (const h of state.hazards) {
+      const flicker = 0.6 + Math.random() * 0.4;
+      g.globalAlpha = flicker * 0.7;
+      g.globalCompositeOperation = "lighter";
+      g.drawImage(staticGlow, h.x - 30, h.y - 30, 60, 60);
+      g.globalCompositeOperation = "source-over";
+      g.globalAlpha = 1;
+      g.fillStyle = "#3a2f52";
+      g.strokeStyle = COLORS.static;
+      g.lineWidth = 1.5;
+      g.beginPath();
+      const spikes = 9;
+      for (let k = 0; k <= spikes * 2; k++) {
+        const a = h.spin + (k / (spikes * 2)) * Math.PI * 2;
+        const rad = k % 2 === 0 ? h.r + Math.random() * 4 : h.r * 0.55;
+        const px = h.x + Math.cos(a) * rad, py = h.y + Math.sin(a) * rad;
+        if (k === 0) g.moveTo(px, py); else g.lineTo(px, py);
+      }
+      g.closePath();
+      g.fill();
+      g.stroke();
+    }
+  }
+
+  function drawPlayer() {
+    if (state.mode !== "play") return;
+    if (state.invincible > 0 && Math.floor(state.invincible * 10) % 2 === 0) return;
+    g.globalCompositeOperation = "lighter";
+    player.trail.forEach((p, k) => {
+      const f = k / player.trail.length;
+      const size = 6 + f * 14;
+      g.globalAlpha = f * 0.35;
+      g.drawImage(fireflyGlow, p.x - size, p.y - size, size * 2, size * 2);
+    });
+    g.globalAlpha = 1;
+    const size = 46 + state.pulse * 14 + Math.sin(state.time * 8) * 3;
+    g.drawImage(fireflyGlow, player.x - size, player.y - size, size * 2, size * 2);
+    g.globalCompositeOperation = "source-over";
+    // Wings
+    const flap = Math.sin(state.time * 40) * 0.5;
+    g.fillStyle = "rgba(243,236,210,0.55)";
+    [-1, 1].forEach((side) => {
+      g.beginPath();
+      g.ellipse(player.x + side * 7, player.y - 6, 7, 3.5, side * (0.6 + flap), 0, Math.PI * 2);
+      g.fill();
+    });
+  }
+
+  function drawEffects() {
+    g.globalCompositeOperation = "lighter";
+    for (const s of state.sparks) {
+      g.globalAlpha = Math.max(0, s.life);
+      g.fillStyle = s.color;
+      g.fillRect(s.x - 1.5, s.y - 1.5, 3, 3);
+    }
+    for (const r of state.rings) {
+      g.globalAlpha = r.life * 0.8;
+      g.strokeStyle = r.color;
+      g.lineWidth = 2;
+      g.beginPath();
+      g.arc(r.x, r.y, 10 + (1 - r.life) * 50, 0, Math.PI * 2);
+      g.stroke();
+    }
+    g.globalCompositeOperation = "source-over";
+    g.font = '600 13px "Martian Mono", monospace';
+    g.textAlign = "center";
+    for (const f of state.floats) {
+      g.globalAlpha = Math.max(0, f.life);
+      g.fillStyle = f.color;
+      g.fillText(f.text, f.x, f.y);
+    }
+    g.globalAlpha = 1;
+  }
+
+  function draw() {
+    g.save();
+    if (state.shake > 0) {
+      g.translate((Math.random() - 0.5) * state.shake, (Math.random() - 0.5) * state.shake);
+    }
+    drawBackground();
+    drawOrbs();
+    drawHazards();
+    drawPlayer();
+    drawEffects();
+    drawGrass(grassFront, "#070b1f", 1);
+    g.restore();
+
+    // A soft bloom on every kick drum
+    if (state.pulse > 0 && !reduceMotion) {
+      g.fillStyle = `rgba(127, 224, 207, ${state.pulse * 0.05})`;
+      g.fillRect(0, 0, W, H);
+    }
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    if (!paused) update(dt);
+    draw();
+    requestAnimationFrame(frame);
+  }
+  for (let k = 0; k < 8; k++) spawnOrb(); // start with a few notes already drifting
+  state.orbs.forEach((o) => { o.x = W * (0.1 + Math.random() * 0.8); o.y = H * (0.1 + Math.random() * 0.7); o.age = 2; });
+  requestAnimationFrame(frame);
+})();
+</script>
