@@ -271,7 +271,7 @@
 <div class="overlay" id="title-screen">
   <div class="card">
     <h1>Firefly Jam</h1>
-    <p>Catch the glowing notes and each one chimes in on the beat. Score higher and the band joins in, then the song travels through four movements, from moonrise to daybreak.</p>
+    <p>Catch the glowing notes and each one chimes in on the beat. Score higher and the band joins in, then the song travels from moonrise to daybreak, and beyond.</p>
     <div class="legend">
       <span><i class="dot note"></i>Catch notes</span>
       <span><i class="dot bad"></i>Dodge static</span>
@@ -352,7 +352,63 @@
       notes: ["#ffe08a", "#ff9fb2", "#9ae8ff"],
       look: { sky: ["#2b2d63", "#a45e8c", "#ffb48a"], hills: "#3b2b58", back: "#4a3163", front: "#1e1533", stars: 0.05, moon: 0, aurora: 0, rain: 0, sun: 1 },
     },
+    // ---- Act II: Lantern Town ----
+    {
+      act: 1, numeral: "V", name: "Dusk Market", at: 420, bpm: 92, key: 62, scale: MAJOR_PENT,
+      chords: [
+        { name: "D", tones: [57, 62, 66], bass: 38 },
+        { name: "Bm", tones: [59, 62, 66], bass: 47 },
+        { name: "G", tones: [59, 62, 67], bass: 43 },
+        { name: "A", tones: [57, 61, 64], bass: 45 },
+      ],
+      groove: { kick: [0, 6, 8], hat: [2, 6, 10, 14], ghost: [3, 11], clap: [4, 12], bass: [0, 6, 8, 11, 14] },
+      notes: ["#ffa06b", "#ffd66b", "#ff8fb8"],
+      look: { sky: ["#1a1433", "#3a2248", "#6b3a4a"], hills: "#140f24", back: "#120d20", front: "#07050f", stars: 0.4, town: 1, lights: 1 },
+    },
+    {
+      act: 1, numeral: "VI", name: "Lantern Rise", at: 560, bpm: 100, key: 59, scale: MINOR_PENT,
+      chords: [
+        { name: "Bm", tones: [59, 62, 66], bass: 47 },
+        { name: "G", tones: [59, 62, 67], bass: 43 },
+        { name: "D", tones: [57, 62, 66], bass: 38 },
+        { name: "A", tones: [57, 61, 64], bass: 45 },
+      ],
+      groove: { kick: [0, 6, 8, 14], hat: [2, 6, 10, 14], ghost: [3, 7, 11, 15], clap: [4, 12], bass: [0, 3, 6, 8, 11, 14] },
+      notes: ["#ffb36b", "#ff8f8f", "#ffe39a"],
+      look: { sky: ["#0d1030", "#1f1a45", "#3a2a55"], hills: "#100c22", back: "#0e0a1e", front: "#06040d", stars: 0.6, town: 1, lights: 1, lanterns: 1 },
+    },
+    {
+      act: 1, numeral: "VII", name: "Fireworks", at: 720, bpm: 116, key: 67, scale: MAJOR_PENT,
+      chords: [
+        { name: "G", tones: [59, 62, 67], bass: 43 },
+        { name: "D", tones: [57, 62, 66], bass: 38 },
+        { name: "Em", tones: [59, 64, 67], bass: 40 },
+        { name: "C", tones: [60, 64, 67], bass: 36 },
+      ],
+      groove: { kick: [0, 3, 6, 8, 11], hat: [2, 6, 10, 14], ghost: [1, 3, 5, 7, 9, 11, 13, 15], clap: [4, 12], bass: [0, 2, 4, 6, 8, 10, 12, 14] },
+      notes: ["#ff7a7a", "#7affc4", "#ffe066"],
+      look: { sky: ["#080a1f", "#141436", "#261d45"], hills: "#0b0a1c", back: "#0a0818", front: "#05030b", stars: 0.3, town: 1, lights: 1, lanterns: 0.5, fireworks: 1 },
+    },
+    {
+      act: 1, numeral: "VIII", name: "Last Light", at: 900, bpm: 104, key: 67, scale: MAJOR_PENT,
+      chords: [
+        { name: "Gmaj7", tones: [59, 62, 66, 67], bass: 43 },
+        { name: "F♯m7", tones: [57, 61, 64, 66], bass: 42 },
+        { name: "Em7", tones: [59, 62, 64, 67], bass: 40 },
+        { name: "A7", tones: [57, 61, 64, 67], bass: 45 },
+      ],
+      groove: { kick: [0, 6, 8], hat: [2, 6, 10, 14], ghost: [7, 15], clap: [12], bass: [0, 6, 8, 11, 14] },
+      notes: ["#a8c8ff", "#ffd6a0", "#e0b8ff"],
+      look: { sky: ["#0b1a3a", "#1d2f5c", "#3b4a7a"], hills: "#0a1228", back: "#0b1430", front: "#050914", stars: 0.8, town: 1, lights: 0.6, lanterns: 1, fullMoon: 1 },
+    },
   ];
+  MOVEMENTS.forEach((mv) => { mv.act = mv.act || 0; });
+  const ACTS = [
+    { numeral: "I", name: "The Meadow", staticColor: "#ff5d8f" },
+    { numeral: "II", name: "Lantern Town", staticColor: "#7ee8ff" },
+  ];
+  const NOTE_NAMES = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
+  const noteName = (m) => NOTE_NAMES[m % 12] + (Math.floor(m / 12) - 1);
   // Lead notes for the solo: two octaves of the movement's pentatonic scale, plus the top root
   MOVEMENTS.forEach((mv) => {
     const base = mv.key + 12;
@@ -372,7 +428,9 @@
   const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
 
   // ================= Audio engine =================
-  let ac = null, master, delaySend, noiseBuf;
+  // `master` is the band bus; the solo lead and sound effects skip it and go straight to `mainOut`,
+  // so the band can be turned down underneath a solo
+  let ac = null, master, mainOut, delaySend, noiseBuf, bandDucked = false;
   let stepDur = 60 / MOVEMENTS[0].bpm / 4; // one sixteenth note, in seconds
   let nextStepTime = 0, stepIndex = 0;
   let movementIdx = 0, phraseBase = 0; // step where the current movement began
@@ -397,10 +455,12 @@
     const comp = ac.createDynamicsCompressor();
     comp.threshold.value = -14;
     comp.ratio.value = 4;
-    master = ac.createGain();
-    master.gain.value = muted ? 0 : 0.8;
-    master.connect(comp);
+    mainOut = ac.createGain();
+    mainOut.gain.value = muted ? 0 : 0.8;
+    mainOut.connect(comp);
     comp.connect(ac.destination);
+    master = ac.createGain();
+    master.connect(mainOut);
 
     // A dotted-eighth echo that the chimes, arp and solo feed into
     const delay = ac.createDelay(1);
@@ -415,7 +475,7 @@
     delay.connect(tone);
     tone.connect(feedback);
     feedback.connect(delay);
-    tone.connect(master);
+    tone.connect(mainOut);
     delaySend.delayNode = delay;
 
     noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
@@ -458,6 +518,12 @@
     if (local % 32 === 0 && transitionArmed) {
       transitionArmed = false;
       if (pendingMovement !== null && pendingMovement !== movementIdx) {
+        // A new act starts its song from scratch: just the pad, then the band rebuilds
+        if (MOVEMENTS[pendingMovement].act !== MOVEMENTS[movementIdx].act) {
+          musicLayer = 0;
+          // Heading back to the meadow means a new run, which counts from zero
+          state.layerBase = MOVEMENTS[pendingMovement].act === 0 ? 0 : state.score;
+        }
         movementIdx = pendingMovement;
         phraseBase = i;
         local = 0;
@@ -478,36 +544,48 @@
     }
     if (s % 4 === 0) events.push({ t, type: "beat", bar: Math.floor(local / 16) + 1, beat: s / 4 + 1 });
 
+    const town = mv.act === 1;
     if (musicLayer >= 1 && mv.groove.kick.includes(s)) {
-      kick(t);
+      if (town) taiko(t, s === 0 ? 1 : 0.7); else kick(t);
       events.push({ t, type: "kick" });
     }
     if (musicLayer >= 2) {
-      if (mv.groove.hat.includes(s)) hat(t, 0.09, 0.05);
-      else if (mv.groove.ghost.includes(s)) hat(t, 0.035, 0.03);
-      if (mv.groove.clap.includes(s)) clap(t, 0.16);
+      if (mv.groove.hat.includes(s)) town ? shaker(t, 0.1) : hat(t, 0.09, 0.05);
+      else if (mv.groove.ghost.includes(s)) town ? shaker(t, 0.04) : hat(t, 0.035, 0.03);
+      if (mv.groove.clap.includes(s)) {
+        town ? woodBlock(t, s === 12 ? 1.5 : 1) : clap(t, 0.16);
+        events.push({ t, type: "clap" });
+      }
     }
     if (musicLayer >= 3 && mv.groove.bass.includes(s)) {
       bass(chord.bass + (s === 10 ? 12 : 0), t, stepDur * 1.7);
     }
     if (musicLayer >= 4 && s % 2 === 0) {
       const k = ARP_ORDER[(s / 2) % ARP_ORDER.length];
-      const m = k === 3 ? chord.tones[0] + 12 : chord.tones[k];
-      pluck(mtof(m + 12), t, 0.06);
+      const m = (k === 3 ? chord.tones[0] + 12 : chord.tones[k]) + 12;
+      const pan = (s / 2) % 2 ? 0.45 : -0.45; // bounce between the speakers
+      if (town) koto(m, t, 0.16, pan); else pluck(mtof(m), t, 0.11, pan);
     }
 
     // The solo: the firefly's height picks the note, on every eighth note
-    if (i < solo.endStep && s % 2 === 0) {
-      const frac = 1 - Math.min(1, Math.max(0, player.y / H));
-      const notes = mv.leadNotes;
-      const m = notes[Math.round(frac * (notes.length - 1))];
-      if (m !== solo.lastNote || player.speed > 40 || s % 8 === 0) {
-        lead(mtof(m), t, stepDur * 1.9);
-        events.push({ t, type: "lead" });
+    const soloing = i < solo.endStep;
+    if (soloing !== bandDucked) {
+      bandDucked = soloing;
+      master.gain.setTargetAtTime(soloing ? 0.5 : 1, t, 0.15);
+    }
+    if (soloing && s % 2 === 0) {
+      const m = mv.leadNotes[leadIndexAt(player.y, mv.leadNotes.length)];
+      if (m !== solo.lastNote || player.speed > 40 || s % 4 === 0) {
+        if (town) flute(mtof(m), t, stepDur * 1.9); else lead(mtof(m), t, stepDur * 1.9);
+        events.push({ t, type: "lead", note: m });
         solo.lastNote = m;
       }
     }
   }
+
+  // Solo pitch rows sit between 8% and 92% of the screen height, highest note at the top
+  const leadRowY = (idx, n) => H * 0.92 - (idx / (n - 1)) * H * 0.84;
+  const leadIndexAt = (y, n) => Math.round(Math.min(1, Math.max(0, (H * 0.92 - y) / (H * 0.84))) * (n - 1));
 
   function envGain(t, peak, attack, release) {
     const g = ac.createGain();
@@ -633,16 +711,24 @@
     o.stop(t + dur + 0.05);
   }
 
-  function pluck(freq, t, vol) {
+  // A bright plucky synth: a square wave whose filter snaps shut, like a tiny harp
+  function pluck(freq, t, vol, pan = 0) {
     const o = ac.createOscillator();
-    o.type = "triangle";
+    o.type = "square";
     o.frequency.value = freq;
-    const g = envGain(t, vol, 0.005, 0.3);
-    o.connect(g);
-    g.connect(master);
-    g.connect(delaySend);
+    const f = ac.createBiquadFilter();
+    f.type = "lowpass";
+    f.Q.value = 4;
+    f.frequency.setValueAtTime(freq * 8, t);
+    f.frequency.exponentialRampToValueAtTime(freq * 1.5, t + 0.25);
+    const g = envGain(t, vol, 0.004, 0.32);
+    o.connect(f);
+    f.connect(g);
+    const out = panned(g, pan);
+    out.connect(master);
+    out.connect(delaySend);
     o.start(t);
-    o.stop(t + 0.35);
+    o.stop(t + 0.38);
   }
 
   function bell(freq, t, vol = 0.22) {
@@ -671,17 +757,17 @@
     f.Q.value = 3;
     f.frequency.setValueAtTime(3400, t);
     f.frequency.exponentialRampToValueAtTime(1100, t + dur);
-    const g = envGain(t, 0.075, 0.012, dur);
+    const g = envGain(t, 0.15, 0.012, dur);
     const vib = ac.createOscillator();
     vib.frequency.value = 5.5;
     const vibDepth = ac.createGain();
-    vibDepth.gain.value = 7;
+    vibDepth.gain.value = 9;
     vib.connect(vibDepth);
-    ["sawtooth", "square"].forEach((type, k) => {
+    [["sawtooth", 1, 6], ["square", 1, -6], ["triangle", 0.5, 0]].forEach(([type, ratio, detune]) => {
       const o = ac.createOscillator();
       o.type = type;
-      o.frequency.value = freq;
-      o.detune.value = k ? -6 : 6;
+      o.frequency.value = freq * ratio; // the triangle adds body an octave below
+      o.detune.value = detune;
       vibDepth.connect(o.detune);
       o.connect(f);
       o.start(t);
@@ -690,11 +776,157 @@
     vib.start(t);
     vib.stop(t + dur + 0.05);
     f.connect(g);
-    g.connect(master);
+    g.connect(mainOut);
+    const send = ac.createGain();
+    send.gain.value = 0.3;
+    g.connect(send);
+    send.connect(delaySend);
+  }
+
+  // ---- Act II instruments ----
+
+  // A breathy flute for Lantern Town solos: sine and triangle plus filtered breath noise
+  function flute(freq, t, dur) {
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.2, t + 0.04);
+    g.gain.setValueAtTime(0.2, t + dur * 0.6);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    g.connect(mainOut);
     const send = ac.createGain();
     send.gain.value = 0.35;
     g.connect(send);
     send.connect(delaySend);
+    const vib = ac.createOscillator();
+    vib.frequency.value = 5;
+    const vibDepth = ac.createGain();
+    vibDepth.gain.setValueAtTime(0, t);
+    vibDepth.gain.linearRampToValueAtTime(12, t + dur); // vibrato blooms as the note holds
+    vib.connect(vibDepth);
+    [["sine", 1, 1], ["triangle", 2, 0.25]].forEach(([type, ratio, amp]) => {
+      const o = ac.createOscillator();
+      o.type = type;
+      o.frequency.value = freq * ratio;
+      vibDepth.connect(o.detune);
+      const og = ac.createGain();
+      og.gain.value = amp;
+      o.connect(og);
+      og.connect(g);
+      o.start(t);
+      o.stop(t + dur + 0.05);
+    });
+    vib.start(t);
+    vib.stop(t + dur + 0.05);
+    const breath = noise(t, dur);
+    const bp = ac.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = freq * 2;
+    bp.Q.value = 4;
+    const bg = envGain(t, 0.25, 0.02, dur * 0.5);
+    breath.connect(bp);
+    bp.connect(bg);
+    bg.connect(g);
+  }
+
+  // A plucked string made with the Karplus-Strong algorithm: a burst of noise is
+  // fed through a short delay loop that averages neighbouring samples. The loop
+  // length sets the pitch, and the averaging mellows it like a real string.
+  const kotoCache = new Map();
+  function kotoBuffer(m) {
+    if (kotoCache.has(m)) return kotoCache.get(m);
+    const sr = ac.sampleRate;
+    const f = mtof(m);
+    const N = Math.max(2, Math.round(sr / f - 0.5));
+    const len = Math.floor(sr * 1.8);
+    const buf = ac.createBuffer(1, len, sr);
+    const d = buf.getChannelData(0);
+    let prev = 0;
+    for (let i = 0; i < N; i++) { prev = prev * 0.5 + (Math.random() * 2 - 1) * 0.5; d[i] = prev; }
+    for (let i = N; i < len; i++) d[i] = 0.497 * (d[i - N] + d[i - N - 1 < 0 ? 0 : i - N - 1]);
+    // The loop really rings at sr / (N + 0.5); playbackRate nudges it exactly in tune
+    const entry = { buf, rate: ((N + 0.5) * f) / sr };
+    kotoCache.set(m, entry);
+    return entry;
+  }
+
+  function koto(m, t, vol, pan = 0) {
+    const { buf, rate } = kotoBuffer(m);
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    src.playbackRate.value = rate;
+    const g = ac.createGain();
+    g.gain.value = vol * 2.2;
+    src.connect(g);
+    const out = panned(g, pan);
+    out.connect(master);
+    const send = ac.createGain();
+    send.gain.value = 0.4;
+    out.connect(send);
+    send.connect(delaySend);
+    src.start(t);
+    src.stop(t + 1.8);
+  }
+
+  function taiko(t, vol) {
+    const o = ac.createOscillator();
+    o.type = "sine";
+    o.frequency.setValueAtTime(115, t);
+    o.frequency.exponentialRampToValueAtTime(52, t + 0.25);
+    const g = envGain(t, 0.95 * vol, 0.004, 0.65);
+    o.connect(g);
+    g.connect(master);
+    o.start(t);
+    o.stop(t + 0.7);
+    const skin = noise(t, 0.15);
+    const lp = ac.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 400;
+    const sg = envGain(t, 0.5 * vol, 0.002, 0.12);
+    skin.connect(lp);
+    lp.connect(sg);
+    sg.connect(master);
+  }
+
+  function shaker(t, vol) {
+    const src = noise(t, 0.1);
+    const bp = ac.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 6500;
+    bp.Q.value = 0.8;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.018);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
+    src.connect(bp);
+    bp.connect(g);
+    g.connect(master);
+  }
+
+  function woodBlock(t, pitch) {
+    [[880 * pitch, 0.22], [1320 * pitch, 0.08]].forEach(([f, vol]) => {
+      const o = ac.createOscillator();
+      o.type = "sine";
+      o.frequency.value = f;
+      const g = envGain(t, vol, 0.002, 0.07);
+      o.connect(g);
+      g.connect(master);
+      o.start(t);
+      o.stop(t + 0.1);
+    });
+  }
+
+  function panned(node, pan) {
+    if (!pan || !ac.createStereoPanner) return node;
+    const p = ac.createStereoPanner();
+    p.pan.value = pan;
+    node.connect(p);
+    return p;
+  }
+
+  const inTown = () => MOVEMENTS[movementIdx].act === 1;
+  // The catch sound: a glassy bell in the meadow, a plucked string in town
+  function chime(m, t, vol) {
+    if (inTown()) koto(m, t, vol * 1.1); else bell(mtof(m), t, vol);
   }
 
   function crunch(t) {
@@ -707,7 +939,7 @@
     const g = envGain(t, 0.5, 0.005, 0.45);
     src.connect(bp);
     bp.connect(g);
-    g.connect(master);
+    g.connect(mainOut);
     [110, 116.5].forEach((fr) => {
       const o = ac.createOscillator();
       o.type = "sawtooth";
@@ -715,7 +947,7 @@
       o.frequency.exponentialRampToValueAtTime(fr * 0.6, t + 0.5);
       const og = envGain(t, 0.12, 0.005, 0.5);
       o.connect(og);
-      og.connect(master);
+      og.connect(mainOut);
       o.start(t);
       o.stop(t + 0.55);
     });
@@ -736,14 +968,14 @@
     if (!ac) return;
     const { t, step } = gridSlot();
     const ladder = chordLadder(step);
-    bell(mtof(ladder[(streak - 1) % ladder.length] + 12), t);
+    chime(ladder[(streak - 1) % ladder.length] + 12, t, 0.22);
   }
 
   function playFarewell() {
     if (!ac) return;
     const { t, step } = gridSlot();
     const tones = chordAt(step).tones;
-    [tones[2] + 12, tones[1] + 12, tones[0] + 12, tones[0]].forEach((m, k) => bell(mtof(m), t + k * stepDur * 2, 0.16));
+    [tones[2] + 12, tones[1] + 12, tones[0] + 12, tones[0]].forEach((m, k) => chime(m, t + k * stepDur * 2, 0.16));
   }
 
   // ================= Canvas and scenery =================
@@ -784,18 +1016,19 @@
   const noteSprites = MOVEMENTS.map((mv) => mv.notes.map((c) => glowSprite(c, 48)));
   const fireflyGlow = glowSprite(COLORS.amber, 64);
   const goldGlow = glowSprite(COLORS.gold, 64);
-  const staticGlow = glowSprite(COLORS.static, 40);
+  const staticGlows = ACTS.map((a) => glowSprite(a.staticColor, 40));
   const hushGlow = glowSprite(COLORS.hush, 44);
+  const lanternGlow = glowSprite("#ffb35c", 40);
   const curtains = ["120,255,180", "110,210,255", "200,150,255"].map(curtainSprite);
 
   // The scene eases toward the current movement's look
   const hexToRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
   const css = (a, alpha = 1) => `rgba(${a.map(Math.round).join(",")},${alpha})`;
+  const SCENE_AMOUNTS = ["stars", "moon", "aurora", "rain", "sun", "town", "lights", "lanterns", "fireworks", "fullMoon"];
   function lookToScene(look) {
-    return {
-      sky: look.sky.map(hexToRgb), hills: hexToRgb(look.hills), back: hexToRgb(look.back), front: hexToRgb(look.front),
-      stars: look.stars, moon: look.moon, aurora: look.aurora, rain: look.rain, sun: look.sun,
-    };
+    const s = { sky: look.sky.map(hexToRgb), hills: hexToRgb(look.hills), back: hexToRgb(look.back), front: hexToRgb(look.front) };
+    SCENE_AMOUNTS.forEach((key) => { s[key] = look[key] || 0; });
+    return s;
   }
   let scene = lookToScene(MOVEMENTS[0].look);
   let sceneTarget = lookToScene(MOVEMENTS[0].look);
@@ -804,7 +1037,41 @@
     const mix = (a, b) => a.map((v, i) => v + (b[i] - v) * k);
     scene.sky = scene.sky.map((c, i) => mix(c, sceneTarget.sky[i]));
     ["hills", "back", "front"].forEach((key) => { scene[key] = mix(scene[key], sceneTarget[key]); });
-    ["stars", "moon", "aurora", "rain", "sun"].forEach((key) => { scene[key] += (sceneTarget[key] - scene[key]) * k; });
+    SCENE_AMOUNTS.forEach((key) => { scene[key] += (sceneTarget[key] - scene[key]) * k; });
+  }
+
+  // Lantern Town: rooftops, strings of paper lanterns between them, and sky lanterns
+  let buildings = [], lightStrings = [], skyLanterns = [];
+  function buildTown() {
+    buildings = [];
+    const ground = H * 0.86;
+    for (let x = -20; x < W + 20;) {
+      const w = 50 + Math.random() * 70;
+      const h = 50 + Math.random() * 110;
+      const roof = Math.random() < 0.45 ? "pagoda" : Math.random() < 0.5 ? "gable" : "flat";
+      const windows = [];
+      for (let wy = ground - h + 14; wy < ground - 14; wy += 20) {
+        for (let wx = x + 10; wx < x + w - 14; wx += 18) {
+          if (Math.random() < 0.4) windows.push({ x: wx, y: wy, flicker: Math.random() * 6 });
+        }
+      }
+      buildings.push({ x, w, top: ground - h, roof, windows });
+      x += w + Math.random() * 8;
+    }
+    lightStrings = [0.6, 0.72].map((yf, k) => {
+      const y = H * yf;
+      const sag = 30 + k * 10;
+      const bulbs = [];
+      for (let bx = 10 + k * 20; bx < W; bx += 42) {
+        const u = bx / W;
+        bulbs.push({ x: bx, y: y + Math.sin(u * Math.PI * 3) * sag * 0.3 + 4 * sag * u * (1 - u), tone: (bulbs.length + k) % 3 });
+      }
+      return bulbs;
+    });
+    skyLanterns = Array.from({ length: 16 }, () => ({
+      x: Math.random() * W, y: H * (0.2 + Math.random() * 0.9), speed: 12 + Math.random() * 16,
+      sway: Math.random() * Math.PI * 2, size: 0.7 + Math.random() * 0.6,
+    }));
   }
 
   function resize() {
@@ -821,6 +1088,7 @@
       r: Math.random() * 1.2 + 0.3,
       tw: Math.random() * Math.PI * 2,
     }));
+    buildTown();
     hills = [];
     for (let x = 0; x <= W + 20; x += 20) {
       hills.push(H * 0.8 - Math.sin(x * 0.004) * 30 - Math.sin(x * 0.011 + 1) * 14);
@@ -853,6 +1121,7 @@
     mult: 1,
     best: loadBest(),
     reached: 0, // furthest movement reached this run
+    layerBase: 0, // score when the current act's song began building up
     orbs: [],
     hazards: [],
     sparks: [],
@@ -909,7 +1178,16 @@
     if (n === musicLayer) return;
     if (announce && n > musicLayer) showToast(`${LAYERS[n].name} joins in`);
     musicLayer = n;
-    hud.layers.forEach((li, k) => li.classList.toggle("on", k <= n));
+    syncLayerChips();
+  }
+
+  // Each chip shows the score where its instrument joins the current act's song
+  function syncLayerChips() {
+    hud.layers.forEach((li, k) => {
+      li.classList.toggle("on", k <= musicLayer);
+      const small = li.querySelector("small");
+      if (small) small.textContent = state.layerBase + LAYERS[k].at;
+    });
   }
 
   const soloActive = () => ac && state.mode === "play" && solo.endStep > gridSlot().step;
@@ -926,7 +1204,7 @@
   function showMovement(idx) {
     const mv = MOVEMENTS[idx];
     sceneTarget = lookToScene(mv.look);
-    hud.mvNum.textContent = `Movement ${mv.numeral}`;
+    hud.mvNum.textContent = mv.act ? `Act ${ACTS[mv.act].numeral} · Movement ${mv.numeral}` : `Movement ${mv.numeral}`;
     hud.mvName.textContent = mv.name;
     document.documentElement.style.setProperty("--accent", mv.notes[0]);
   }
@@ -934,9 +1212,11 @@
   function startGame() {
     initAudio();
     Object.assign(state, {
-      mode: "play", score: 0, lives: 3, streak: 0, mult: 1, reached: 0,
+      mode: "play", score: 0, lives: 3, streak: 0, mult: 1, reached: 0, layerBase: 0,
       hazards: [], orbTimer: 0.3, hazardTimer: 3, invincible: 0, shake: 0,
     });
+    musicLayer = -1; // force the chips to redraw
+    setLayer(0, false);
     state.orbs = state.orbs.filter((o) => o.kind === "note");
     solo.endStep = -1;
     // A new run always starts back at Moonrise
@@ -961,7 +1241,8 @@
     $("final-best").textContent = state.best;
     const mv = MOVEMENTS[state.reached];
     const next = MOVEMENTS[state.reached + 1];
-    let note = `You reached Movement ${mv.numeral}, ${mv.name}.`;
+    const where = mv.act ? `Act ${ACTS[mv.act].numeral}, Movement ${mv.numeral}` : `Movement ${mv.numeral}`;
+    let note = `You reached ${where}, ${mv.name}.`;
     if (newBest && state.score > 0) note += " New best! The fireflies will remember that one.";
     else if (next) note += ` Score ${next.at} to hear ${next.name}.`;
     else note += " That's the whole song. Beautiful.";
@@ -978,7 +1259,7 @@
   function toggleMute() {
     muted = !muted;
     $("mute").textContent = muted ? "Sound off" : "Sound on";
-    if (master) master.gain.setTargetAtTime(muted ? 0 : 0.8, ac.currentTime, 0.05);
+    if (mainOut) mainOut.gain.setTargetAtTime(muted ? 0 : 0.8, ac.currentTime, 0.05);
   }
 
   // ================= Input =================
@@ -1047,8 +1328,12 @@
   }
 
   function spawnHazard() {
-    const speed = 55 + Math.min(110, state.score * 0.6) + Math.random() * 25;
-    state.hazards.push({ ...fromEdge(speed), r: 14, spin: Math.random() * 6, age: 0, doomAt: null });
+    const act = MOVEMENTS[movementIdx].act;
+    const speed = 55 + Math.min(110, state.score * 0.6) + act * 25 + Math.random() * 25;
+    state.hazards.push({
+      ...fromEdge(speed), r: 14, spin: Math.random() * 6, age: 0, doomAt: null,
+      act, weave: act ? 70 + Math.random() * 50 : 0, // Lantern Town static weaves side to side
+    });
   }
 
   const offscreen = (o) => o.age > 1 && (o.x < -80 || o.x > W + 80 || o.y < -80 || o.y > H + 80);
@@ -1075,18 +1360,36 @@
     if (ev.type === "lead" && state.mode === "play") {
       state.floats.push({ x: player.x + (Math.random() - 0.5) * 16, y: player.y - 20, text: "♪", life: 1, color: COLORS.gold, big: true });
     }
+    if ((ev.type === "clap" || ev.type === "kick") && scene.fireworks > 0.5 && Math.random() < (ev.type === "clap" ? 0.8 : 0.25)) {
+      firework();
+    }
     if (ev.type === "movement") {
-      showMovement(ev.idx);
-      if (!reduceMotion) state.flash = Math.max(state.flash, 0.6);
       const mv = MOVEMENTS[ev.idx];
+      const newAct = ev.idx > 0 && MOVEMENTS[ev.idx - 1].act !== mv.act;
+      showMovement(ev.idx);
+      syncLayerChips();
+      if (!reduceMotion) state.flash = Math.max(state.flash, newAct ? 1 : 0.6);
       if (state.mode === "play" && ev.idx > 0) {
         state.reached = Math.max(state.reached, ev.idx);
         let sub = "";
         if (state.lives < 3) { state.lives++; sub = "+1 life"; }
         else { state.score += 10; sub = "+10 bonus"; }
         refreshHud();
+        if (newAct) showToast(`Act ${ACTS[mv.act].numeral} · ${ACTS[mv.act].name}`, "A new song begins", true);
         showToast(`${mv.numeral} · ${mv.name}`, `${mv.bpm} BPM · ${sub}`);
       }
+    }
+  }
+
+  // A rocket bursts somewhere in the sky, in this movement's colours, and falls with gravity
+  function firework() {
+    const x = W * (0.15 + Math.random() * 0.7);
+    const y = H * (0.12 + Math.random() * 0.3);
+    const color = MOVEMENTS[movementIdx].notes[Math.floor(Math.random() * 3)];
+    for (let i = 0; i < 36; i++) {
+      const a = (i / 36) * Math.PI * 2;
+      const s = 90 + Math.random() * 40;
+      state.sparks.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1.3, color, grav: true });
     }
   }
 
@@ -1113,7 +1416,8 @@
       state.hazardTimer -= dt;
       if (state.hazardTimer <= 0) {
         spawnHazard();
-        state.hazardTimer = Math.max(0.8, 3 - state.score * 0.012) * (0.7 + Math.random() * 0.6);
+        const minGap = MOVEMENTS[movementIdx].act ? 0.65 : 0.8;
+        state.hazardTimer = Math.max(minGap, 3 - state.score * 0.012) * (0.7 + Math.random() * 0.6);
       }
 
       let kx = 0, ky = 0;
@@ -1158,6 +1462,13 @@
       h.spin += dt * 3;
       h.x += h.vx * dt;
       h.y += h.vy * dt;
+      if (h.weave && h.doomAt == null) {
+        // Sway sideways to the direction of travel
+        const sp = Math.hypot(h.vx, h.vy) || 1;
+        const side = Math.cos(h.age * 2.2) * h.weave * dt;
+        h.x += (-h.vy / sp) * side;
+        h.y += (h.vx / sp) * side;
+      }
       if (h.doomAt != null && now >= h.doomAt && !h.popped) {
         h.popped = true;
         burst(h.x, h.y, COLORS.hush, 16, 160);
@@ -1187,9 +1498,15 @@
     for (const s of state.sparks) {
       s.x += s.vx * dt;
       s.y += s.vy * dt;
-      s.vx *= 0.94;
-      s.vy *= 0.94;
-      s.life -= dt * 1.6;
+      if (s.grav) {
+        s.vx *= 0.985;
+        s.vy = s.vy * 0.985 + 60 * dt;
+        s.life -= dt * 0.9;
+      } else {
+        s.vx *= 0.94;
+        s.vy *= 0.94;
+        s.life -= dt * 1.6;
+      }
     }
     state.sparks = state.sparks.filter((s) => s.life > 0);
     for (const r of state.rings) r.life -= dt * 1.8;
@@ -1202,6 +1519,11 @@
       d.y += d.speed * dt;
       d.x -= d.speed * 0.25 * dt;
       if (d.y > H) { d.y = -20; d.x = Math.random() * (W + 100); }
+    }
+    for (const l of skyLanterns) {
+      l.y -= l.speed * dt;
+      l.sway += dt;
+      if (l.y < -40) { l.y = H * 0.9 + Math.random() * 60; l.x = Math.random() * W; }
     }
 
     // Keep the solo label in step with the music
@@ -1232,7 +1554,7 @@
       solo.endStep = step + toBeat + SOLO_STEPS;
       solo.lastNote = null;
       const ladder = chordLadder(step);
-      ladder.slice(0, 5).forEach((m, k) => bell(mtof(m + 12), t + k * stepDur * 0.5, 0.14));
+      ladder.slice(0, 5).forEach((m, k) => chime(m + 12, t + k * stepDur * 0.5, 0.14));
     }
     burst(o.x, o.y, COLORS.gold, 30, 220);
     state.rings.push({ x: o.x, y: o.y, life: 1, color: COLORS.gold });
@@ -1254,7 +1576,8 @@
       targets.forEach((h, k) => {
         const tk = t + (k + 1) * stepDur;
         h.doomAt = tk;
-        pluck(mtof(ladder[k % ladder.length] + 12), tk, 0.12);
+        if (inTown()) koto(ladder[k % ladder.length] + 12, tk, 0.14);
+        else pluck(mtof(ladder[k % ladder.length] + 12), tk, 0.1);
       });
     } else {
       targets.forEach((h, k) => { h.doomAt = clock() + (k + 1) * 0.1; });
@@ -1267,7 +1590,7 @@
 
   function scoreChanged() {
     let layer = 0;
-    LAYERS.forEach((l, k) => { if (state.score >= l.at) layer = k; });
+    LAYERS.forEach((l, k) => { if (state.score - state.layerBase >= l.at) layer = k; });
     setLayer(layer, true);
     let target = 0;
     MOVEMENTS.forEach((mv, k) => { if (state.score >= mv.at) target = k; });
@@ -1282,7 +1605,7 @@
     state.invincible = 1.6;
     state.shake = reduceMotion ? 0 : 14;
     if (ac) crunch(ac.currentTime);
-    burst(player.x, player.y, COLORS.static, 22, 220);
+    burst(player.x, player.y, ACTS[h.act || 0].staticColor, 22, 220);
     h.x = -1000; // remove the blob that hit you
     h.age = 99;
     refreshHud();
@@ -1310,6 +1633,8 @@
     drawAurora();
     drawSun();
     drawMoon();
+    drawFullMoon();
+    drawSkyLanterns();
 
     g.fillStyle = css(scene.hills);
     g.beginPath();
@@ -1319,7 +1644,104 @@
     g.closePath();
     g.fill();
 
+    drawTown();
     drawGrass(grassBack, css(scene.back), 0.6);
+  }
+
+  function drawFullMoon() {
+    if (scene.fullMoon < 0.01) return;
+    const mx = W * 0.72, my = H * 0.22, mr = Math.min(W, H) * 0.08 + 14;
+    const halo = g.createRadialGradient(mx, my, mr * 0.9, mx, my, mr * 5);
+    halo.addColorStop(0, `rgba(230,236,255,${0.25 * scene.fullMoon})`);
+    halo.addColorStop(1, "rgba(230,236,255,0)");
+    g.fillStyle = halo;
+    g.fillRect(mx - mr * 5, my - mr * 5, mr * 10, mr * 10);
+    g.fillStyle = `rgba(246,243,230,${scene.fullMoon})`;
+    g.beginPath();
+    g.arc(mx, my, mr, 0, Math.PI * 2);
+    g.fill();
+    // A few soft craters
+    g.fillStyle = `rgba(200,200,215,${0.35 * scene.fullMoon})`;
+    [[-0.3, -0.2, 0.22], [0.25, 0.15, 0.15], [0.05, -0.4, 0.1], [-0.1, 0.35, 0.12]].forEach(([dx, dy, r]) => {
+      g.beginPath();
+      g.arc(mx + dx * mr, my + dy * mr, r * mr, 0, Math.PI * 2);
+      g.fill();
+    });
+  }
+
+  function drawSkyLanterns() {
+    if (scene.lanterns < 0.01) return;
+    for (const l of skyLanterns) {
+      const x = l.x + Math.sin(l.sway * 0.8) * 10;
+      const s = l.size;
+      const flicker = 0.85 + Math.sin(state.time * 7 + l.sway * 3) * 0.15;
+      g.globalAlpha = scene.lanterns * flicker * 0.8;
+      g.globalCompositeOperation = "lighter";
+      g.drawImage(lanternGlow, x - 30 * s, l.y - 30 * s, 60 * s, 60 * s);
+      g.globalCompositeOperation = "source-over";
+      g.globalAlpha = scene.lanterns * 0.95;
+      g.fillStyle = "#ffcf8a";
+      g.beginPath();
+      g.roundRect ? g.roundRect(x - 6 * s, l.y - 8 * s, 12 * s, 15 * s, 4 * s) : g.rect(x - 6 * s, l.y - 8 * s, 12 * s, 15 * s);
+      g.fill();
+    }
+    g.globalAlpha = 1;
+  }
+
+  function drawTown() {
+    if (scene.town < 0.01) return;
+    const a = scene.town;
+    g.globalAlpha = a;
+    g.fillStyle = css(scene.back.map((v) => v * 0.8));
+    for (const b of buildings) {
+      g.fillRect(b.x, b.top, b.w, H - b.top);
+      g.beginPath();
+      if (b.roof === "pagoda") {
+        // Upturned eaves on both sides
+        g.moveTo(b.x - 12, b.top + 4);
+        g.quadraticCurveTo(b.x + b.w * 0.25, b.top - 4, b.x + b.w / 2, b.top - 26);
+        g.quadraticCurveTo(b.x + b.w * 0.75, b.top - 4, b.x + b.w + 12, b.top + 4);
+        g.closePath();
+      } else if (b.roof === "gable") {
+        g.moveTo(b.x - 4, b.top + 1);
+        g.lineTo(b.x + b.w / 2, b.top - 20);
+        g.lineTo(b.x + b.w + 4, b.top + 1);
+        g.closePath();
+      }
+      g.fill();
+    }
+    // Lit windows, gently flickering
+    for (const b of buildings) {
+      for (const w of b.windows) {
+        g.globalAlpha = a * (0.55 + 0.2 * Math.sin(state.time * 1.3 + w.flicker));
+        g.fillStyle = "#ffc46b";
+        g.fillRect(w.x, w.y, 7, 9);
+      }
+    }
+    g.globalAlpha = 1;
+
+    // Strings of paper lanterns, bobbing on the beat
+    if (scene.lights < 0.01) return;
+    lightStrings.forEach((bulbs) => {
+      g.globalAlpha = scene.lights * a * 0.5;
+      g.strokeStyle = "#241a33";
+      g.lineWidth = 1;
+      g.beginPath();
+      bulbs.forEach((p, k) => (k ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y)));
+      g.stroke();
+      g.globalCompositeOperation = "lighter";
+      // Kept small, dim and single-coloured so they never look like catchable notes
+      for (const p of bulbs) {
+        const size = 9 + state.pulse * 3;
+        g.globalAlpha = scene.lights * a * 0.45;
+        g.drawImage(lanternGlow, p.x - size, p.y + 6 - size, size * 2, size * 2);
+      }
+      g.globalCompositeOperation = "source-over";
+      g.globalAlpha = scene.lights * a * 0.8;
+      g.fillStyle = "#c9743f";
+      for (const p of bulbs) g.fillRect(p.x - 2.5, p.y + 2, 5, 7);
+    });
+    g.globalAlpha = 1;
   }
 
   function drawMoon() {
@@ -1454,11 +1876,12 @@
       const doomed = h.doomAt != null;
       g.globalAlpha = doomed ? 0.5 : (0.6 + Math.random() * 0.4) * 0.7;
       g.globalCompositeOperation = "lighter";
-      g.drawImage(doomed ? hushGlow : staticGlow, h.x - 30, h.y - 30, 60, 60);
+      const act = h.act || 0;
+      g.drawImage(doomed ? hushGlow : staticGlows[act], h.x - 30, h.y - 30, 60, 60);
       g.globalCompositeOperation = "source-over";
       g.globalAlpha = 1;
-      g.fillStyle = doomed ? "#8d8aa8" : "#3a2f52";
-      g.strokeStyle = doomed ? COLORS.hush : COLORS.static;
+      g.fillStyle = doomed ? "#8d8aa8" : act ? "#1f2f4a" : "#3a2f52";
+      g.strokeStyle = doomed ? COLORS.hush : ACTS[act].staticColor;
       g.lineWidth = 1.5;
       g.beginPath();
       const spikes = 9;
@@ -1504,6 +1927,11 @@
 
     // A ring that runs down as the solo plays out
     if (soloOn) {
+      g.strokeStyle = "rgba(255,215,106,0.25)";
+      g.lineWidth = 2.5;
+      g.beginPath();
+      g.arc(player.x, player.y, 22, 0, Math.PI * 2);
+      g.stroke();
       g.strokeStyle = COLORS.gold;
       g.lineWidth = 2.5;
       g.lineCap = "round";
@@ -1511,6 +1939,30 @@
       g.arc(player.x, player.y, 22, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * soloLeft());
       g.stroke();
     }
+  }
+
+  // During a solo, faint rows across the screen show which note each height plays
+  function drawSoloGuide() {
+    if (!soloActive()) return;
+    const notes = MOVEMENTS[movementIdx].leadNotes;
+    const current = leadIndexAt(player.y, notes.length);
+    g.font = '600 11px "Martian Mono", monospace';
+    g.textAlign = "right";
+    g.textBaseline = "middle";
+    notes.forEach((m, idx) => {
+      const y = leadRowY(idx, notes.length);
+      const on = idx === current;
+      const isRoot = (m - MOVEMENTS[movementIdx].key) % 12 === 0;
+      g.strokeStyle = on ? "rgba(255,215,106,0.55)" : `rgba(255,215,106,${isRoot ? 0.16 : 0.08})`;
+      g.lineWidth = on ? 2 : 1;
+      g.beginPath();
+      g.moveTo(0, y);
+      g.lineTo(W - 44, y);
+      g.stroke();
+      g.fillStyle = on ? COLORS.gold : "rgba(255,215,106,0.4)";
+      g.fillText(noteName(m), W - 10, y);
+    });
+    g.textBaseline = "alphabetic";
   }
 
   function drawEffects() {
@@ -1553,6 +2005,7 @@
       g.translate((Math.random() - 0.5) * state.shake, (Math.random() - 0.5) * state.shake);
     }
     drawBackground();
+    drawSoloGuide();
     drawOrbs();
     drawHazards();
     drawPlayer();
