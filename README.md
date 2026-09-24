@@ -49,12 +49,21 @@ The static turns icy blue here, and it weaves side to side as it moves.
 - **Hush ring:** appears when the static gets crowded. It sends out a shockwave that pops every static blob, one per sixteenth note, and each pop plays a note of a rising arpeggio.
 - **Static (avoid):** the pink spiky blobs. Hitting one costs a life and resets your multiplier.
 
+## Three looks
+
+Switch at any time with the **Look** buttons on the start and game-over screens, the Look button in the corner, or the `V` key. Your choice is remembered.
+
+- **Paper** (default): a cut-paper shadow box. The sky is torn strips of coloured paper, the hills, rooftops and grass are hand-cut layers that cast little shadows, the notes are music-note stickers, and a paper grain lies over everything. The scenery moves at 12 frames a second and its edges "boil" slightly, like stop-motion animation, while the firefly and pickups stay smooth. The firefly's tail is the only real light.
+- **Pixel**: the scene is drawn at a quarter of the resolution, then every colour is snapped to a few levels with 4×4 Bayer dithering, the checkerboard shading of old consoles. Text is drawn in a pixel font on top so it stays readable.
+- **Glow**: soft, luminous, with additive light. The original look.
+
 ## How to play
 
 Open `index.html` in any web browser. There's nothing to install.
 
 - **Move:** mouse, finger, or arrow keys / WASD
 - **Mute:** the Sound button or the `M` key
+- **Change the look:** the Look buttons or the `V` key
 
 ## How it works
 
