@@ -245,7 +245,14 @@
     .movement b { font-size: 16px; }
     .legend { grid-template-columns: auto; }
     #look { display: none; }
+    .movement .lbl { display: none; }
   }
+  /* Medium screens: stack the lives above the buttons so nothing crowds the movement name */
+  @media (max-width: 900px) {
+    .right { flex-wrap: wrap; row-gap: 8px; column-gap: 8px; }
+    #lives { width: 100%; justify-content: flex-end; }
+  }
+  #mute, #look, .movement .lbl { white-space: nowrap; }
 
   /* ---- Paper look: cream card stock, hand-cut lettering, flat shadows ---- */
   body[data-look="paper"] {
