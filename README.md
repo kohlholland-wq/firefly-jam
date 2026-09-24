@@ -12,7 +12,7 @@ You're a firefly in a night meadow. Catch the glowing notes. Each one plays a ch
 | 45 | Bass |
 | 70 | Arpeggio |
 
-## Two acts, eight movements
+## Three acts, twelve movements
 
 Keep scoring and the song travels through sections, each with its own key, tempo, drum groove and scenery. Changes wait for the end of a musical phrase, with a drum fill and a rising sweep leading in. Each new movement gives you back a life.
 
@@ -42,6 +42,29 @@ The static turns icy blue here, and it weaves side to side as it moves.
 | 720 | VII · Fireworks | G D Em C | 116 BPM | Fireworks burst on the beat |
 | 900 | VIII · Last Light | Gmaj7 F♯m7 Em7 A7 | 104 BPM | A full moon |
 
+### Act III · Skyward
+
+The firefly leaves the town and flies up into the night sky. The ground sinks away, clouds rush past, and a third band takes over:
+
+- **FM synthesis** chimes: one oscillator bends another's pitch so fast that it becomes tone colour, like an 80s electric piano
+- a wide **supersaw pad** that **pumps** in time with the kick (sidechain ducking)
+- open hi-hats, echoing claps, a square-wave bass and a sixteenth-note arpeggio
+- a **theremin** for solos, one continuous voice that glides smoothly between notes as you move
+
+The static turns lime green, and two new mechanics appear:
+
+- **Constellations** (from Movement X): 5–6 star-notes appear in a shape with a faint dotted outline. Each star you catch draws a line and plays the next note of a rising melody. Catch them all before they fade for a bonus and the constellation's name.
+- **Meteors** (Movement XI): a dashed warning line appears one bar before each meteor streaks along it on the downbeat.
+
+| Score | Movement | Chords | Tempo | Scenery |
+|---|---|---|---|---|
+| 1100 | IX · Ascent | Fmaj7 G Em7 Am | 88 BPM | Clouds rushing past as the land falls away |
+| 1250 | X · Constellations | Dm9 B♭maj7 F C | 100 BPM | Deep space and nebulae |
+| 1400 | XI · Meteor Shower | Cm A♭ E♭ B♭ | 124 BPM | Shooting stars and meteors |
+| 1600 | XII · Homecoming | Am F C G | 96 BPM | Back to the meadow at dawn, with fireflies in the grass |
+
+Homecoming brings back Moonrise's chords, and every band from the journey plays together: the catch chimes take turns between the meadow bell, the town koto and the sky's FM bell.
+
 ## Pickups
 
 - **Notes:** points, plus a chime. Catch them in a row to build a multiplier of up to ×4.
@@ -54,7 +77,7 @@ The static turns icy blue here, and it weaves side to side as it moves.
 Switch at any time with the **Look** buttons on the start and game-over screens, the Look button in the corner, or the `V` key. Your choice is remembered.
 
 - **Paper** (default): a cut-paper shadow box. The sky is torn strips of coloured paper, the hills, rooftops and grass are hand-cut layers that cast little shadows, the notes are music-note stickers, and a paper grain lies over everything. The scenery moves at 12 frames a second and its edges "boil" slightly, like stop-motion animation, while the firefly and pickups stay smooth. The firefly's tail is the only real light.
-- **Pixel**: the scene is drawn at a quarter of the resolution, then every colour is snapped to a few levels with 4×4 Bayer dithering, the checkerboard shading of old consoles. Text is drawn in a pixel font on top so it stays readable.
+- **Pixel**: the scene is drawn at a quarter of the resolution, then every colour is snapped to a few levels with 4×4 Bayer dithering, the checkerboard shading of old consoles. Hand-drawn sprites with dark outlines mark the notes, static, stars, meteors and firefly, and text is drawn in a pixel font on top so it stays readable.
 - **Glow**: soft, luminous, with additive light. The original look.
 
 ## How to play
