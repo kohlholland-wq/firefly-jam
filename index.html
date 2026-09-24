@@ -8,15 +8,12 @@
   :root {
     color-scheme: dark;
     --night: #0e1630;
-    --dusk: #2a2555;
     --moon: #f3ecd2;
     --moon-dim: rgba(243, 236, 210, 0.62);
     --amber: #ffc65c;
-    --teal: #7fe0cf;
-    --rose: #f4a3c0;
-    --lilac: #c4b2ff;
+    --gold: #ffd76a;
+    --accent: #7fe0cf;
     --static: #ff5d8f;
-    --panel: rgba(14, 22, 48, 0.72);
     --display: "Shrikhand", "Georgia", serif;
     --body: "Figtree", "Segoe UI", system-ui, sans-serif;
     --mono: "Martian Mono", "SFMono-Regular", Menlo, Consolas, monospace;
@@ -52,21 +49,42 @@
     position: fixed;
     left: 0;
     right: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     gap: 16px;
     padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
     pointer-events: none;
     font-variant-numeric: tabular-nums;
   }
-  .hud.top { top: 0; padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
-  .hud.bottom { bottom: 0; padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px)); align-items: flex-end; }
+  .hud.top {
+    top: 0;
+    padding-top: calc(14px + env(safe-area-inset-top, 0px));
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: start;
+  }
+  .hud.bottom {
+    bottom: 0;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
   .stat { display: flex; flex-direction: column; gap: 2px; }
   .stat b { font-family: var(--mono); font-weight: 600; font-size: 22px; line-height: 1.1; }
-  .score-row { display: flex; align-items: baseline; gap: 10px; }
+  .score-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
   #mult { font-family: var(--mono); font-size: 13px; color: var(--amber); }
-  .right { display: flex; align-items: center; gap: 14px; }
+  #mult.solo { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+  .movement { text-align: center; padding-top: 4px; }
+  .movement b {
+    display: block;
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.1;
+    color: var(--accent);
+    text-shadow: 0 0 16px color-mix(in srgb, var(--accent) 50%, transparent);
+    transition: color 1.5s;
+  }
+  .right { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
   #lives { display: flex; gap: 6px; }
   #lives i {
     width: 10px; height: 10px; border-radius: 50%;
@@ -75,11 +93,7 @@
     transition: opacity 0.3s, transform 0.3s;
   }
   #lives i.gone { opacity: 0.15; box-shadow: none; transform: scale(0.7); }
-  button {
-    font: inherit;
-    color: inherit;
-    cursor: pointer;
-  }
+  button { font: inherit; color: inherit; cursor: pointer; }
   #mute {
     pointer-events: auto;
     font-family: var(--mono);
@@ -114,9 +128,9 @@
   }
   #layers li.on {
     color: var(--night);
-    background: var(--teal);
-    border-color: var(--teal);
-    box-shadow: 0 0 14px rgba(127, 224, 207, 0.55);
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 55%, transparent);
   }
   #layers li small { opacity: 0.7; margin-left: 4px; font-size: 9px; }
   .stat.end { align-items: flex-end; text-align: right; }
@@ -125,15 +139,25 @@
     left: 50%;
     top: 22%;
     transform: translate(-50%, 10px);
-    font-family: var(--display);
-    font-size: clamp(22px, 5vw, 34px);
-    color: var(--teal);
-    text-shadow: 0 0 18px rgba(127, 224, 207, 0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.5s, transform 0.5s;
+    transition: opacity 0.45s, transform 0.45s;
     white-space: nowrap;
+    text-align: center;
   }
+  #toast b {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(24px, 6vw, 38px);
+    color: var(--accent);
+    text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  #toast.gold b { color: var(--gold); text-shadow: 0 0 18px rgba(255, 215, 106, 0.6); }
+  #toast span { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--moon); }
   #toast.show { opacity: 1; transform: translate(-50%, 0); }
   .overlay {
     position: fixed;
@@ -141,10 +165,10 @@
     display: grid;
     place-items: center;
     padding-inline: 16px;
-    background: radial-gradient(ellipse at center, rgba(14, 22, 48, 0.35), rgba(14, 22, 48, 0.8));
+    background: radial-gradient(ellipse at center, rgba(14, 22, 48, 0.35), rgba(14, 22, 48, 0.82));
   }
   .card {
-    max-width: 440px;
+    max-width: 460px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -164,11 +188,25 @@
   .card h2 { font-size: clamp(34px, 9vw, 52px); }
   .card p { margin: 0; font-size: 16px; line-height: 1.55; color: var(--moon); text-wrap: pretty; }
   .card .how { font-size: 14px; color: var(--moon-dim); }
-  .legend { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; font-size: 13px; color: var(--moon-dim); }
-  .legend span { display: inline-flex; align-items: center; gap: 7px; }
-  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-  .dot.note { background: var(--teal); box-shadow: 0 0 10px var(--teal); }
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: 8px 22px;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--moon-dim);
+    text-align: left;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex: none; }
+  .dot.note { background: #7fe0cf; box-shadow: 0 0 10px #7fe0cf; }
   .dot.bad { background: #3a2f52; box-shadow: 0 0 0 2px var(--static); border-radius: 3px; transform: rotate(45deg); width: 10px; height: 10px; }
+  .dot.gold {
+    background: var(--gold);
+    clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    width: 14px; height: 14px; border-radius: 0;
+  }
+  .dot.hush { border: 2px solid #dfe8ff; box-shadow: 0 0 10px #dfe8ff; width: 10px; height: 10px; }
   .play {
     margin-top: 6px;
     font-family: var(--mono);
@@ -191,6 +229,8 @@
     .hud.bottom { flex-wrap: wrap; justify-content: center; }
     .hud.bottom .stat { display: none; }
     .stat b { font-size: 18px; }
+    .movement b { font-size: 16px; }
+    .legend { grid-template-columns: auto; }
   }
   @media (prefers-reduced-motion: reduce) {
     #toast, #layers li, .play { transition: none; }
@@ -203,6 +243,10 @@
   <div class="stat">
     <span class="lbl">Score</span>
     <div class="score-row"><b id="score">0</b><span id="mult">×1</span></div>
+  </div>
+  <div class="movement">
+    <span class="lbl" id="movement-num">Movement I</span>
+    <b id="movement-name">Moonrise</b>
   </div>
   <div class="right">
     <div id="lives" aria-label="Lives"><i></i><i></i><i></i></div>
@@ -222,15 +266,17 @@
   <div class="stat end"><span class="lbl">Bar · Beat</span><b id="pos">1 · 1</b></div>
 </div>
 
-<div id="toast"></div>
+<div id="toast"><b></b><span></span></div>
 
 <div class="overlay" id="title-screen">
   <div class="card">
     <h1>Firefly Jam</h1>
-    <p>Catch the glowing notes and each one chimes in on the beat. Score higher and the band joins in, one instrument at a time.</p>
+    <p>Catch the glowing notes and each one chimes in on the beat. Score higher and the band joins in, then the song travels through four movements, from moonrise to daybreak.</p>
     <div class="legend">
       <span><i class="dot note"></i>Catch notes</span>
       <span><i class="dot bad"></i>Dodge static</span>
+      <span><i class="dot gold"></i>Star: play a solo</span>
+      <span><i class="dot hush"></i>Hush: clear the static</span>
     </div>
     <p class="how">Move with your mouse, finger, or arrow keys. Sound on for the full effect.</p>
     <button class="play" id="start" type="button">Start the jam</button>
@@ -252,15 +298,67 @@
 
 <script>
 (() => {
-  // ---------- Music setup ----------
-  const BPM = 96;
-  const STEP = 60 / BPM / 4; // one sixteenth note, in seconds
-  const CHORDS = [
-    { name: "Am", tones: [57, 60, 64], bass: 45 },
-    { name: "F",  tones: [53, 57, 60], bass: 41 },
-    { name: "C",  tones: [55, 60, 64], bass: 48 },
-    { name: "G",  tones: [55, 59, 62], bass: 43 },
+  // ================= The song =================
+  const MINOR_PENT = [0, 3, 5, 7, 10];
+  const MAJOR_PENT = [0, 2, 4, 7, 9];
+
+  // Each movement is a section of the song with its own key, tempo, groove and sky.
+  const MOVEMENTS = [
+    {
+      numeral: "I", name: "Moonrise", at: 0, bpm: 96, key: 57, scale: MINOR_PENT,
+      chords: [
+        { name: "Am", tones: [57, 60, 64], bass: 45 },
+        { name: "F", tones: [53, 57, 60], bass: 41 },
+        { name: "C", tones: [55, 60, 64], bass: 48 },
+        { name: "G", tones: [55, 59, 62], bass: 43 },
+      ],
+      groove: { kick: [0, 4, 8, 12], hat: [2, 6, 10, 14], ghost: [7, 15], clap: [], bass: [0, 3, 6, 8, 10, 14] },
+      notes: ["#7fe0cf", "#f4a3c0", "#c4b2ff"],
+      look: { sky: ["#0b1229", "#1a2150", "#2a2555"], hills: "#141a3d", back: "#10163a", front: "#070b1f", stars: 1, moon: 1, aurora: 0, rain: 0, sun: 0 },
+    },
+    {
+      numeral: "II", name: "Aurora", at: 80, bpm: 104, key: 64, scale: MINOR_PENT,
+      chords: [
+        { name: "Em", tones: [59, 64, 67], bass: 40 },
+        { name: "C", tones: [60, 64, 67], bass: 36 },
+        { name: "G", tones: [59, 62, 67], bass: 43 },
+        { name: "D", tones: [57, 62, 66], bass: 38 },
+      ],
+      groove: { kick: [0, 4, 8, 12], hat: [2, 6, 10, 14], ghost: [3, 11, 15], clap: [4, 12], bass: [0, 3, 6, 8, 11, 14] },
+      notes: ["#8ff5b0", "#7fd4ff", "#e0a8ff"],
+      look: { sky: ["#061420", "#0c2a3a", "#1b3d4c"], hills: "#0b2230", back: "#0a1c28", front: "#041018", stars: 0.8, moon: 0.5, aurora: 1, rain: 0, sun: 0 },
+    },
+    {
+      numeral: "III", name: "Rainfall", at: 170, bpm: 112, key: 66, scale: MINOR_PENT,
+      chords: [
+        { name: "F♯m", tones: [57, 61, 66], bass: 42 },
+        { name: "D", tones: [57, 62, 66], bass: 38 },
+        { name: "A", tones: [57, 61, 64], bass: 45 },
+        { name: "E", tones: [56, 59, 64], bass: 40 },
+      ],
+      groove: { kick: [0, 3, 8, 10], hat: [2, 6, 10, 14], ghost: [1, 3, 5, 7, 9, 11, 13, 15], clap: [4, 12], bass: [0, 2, 4, 6, 8, 10, 12, 14] },
+      notes: ["#9fb8ff", "#ff9fd0", "#9ff0e8"],
+      look: { sky: ["#12111e", "#221e35", "#302a46"], hills: "#1b172a", back: "#16122a", front: "#0a0814", stars: 0.15, moon: 0, aurora: 0, rain: 1, sun: 0 },
+    },
+    {
+      numeral: "IV", name: "Daybreak", at: 280, bpm: 120, key: 60, scale: MAJOR_PENT,
+      chords: [
+        { name: "Cmaj7", tones: [60, 64, 67, 71], bass: 36 },
+        { name: "Am7", tones: [57, 60, 64, 67], bass: 45 },
+        { name: "Fmaj7", tones: [53, 57, 60, 64], bass: 41 },
+        { name: "G", tones: [55, 59, 62, 67], bass: 43 },
+      ],
+      groove: { kick: [0, 4, 8, 12], hat: [2, 6, 10, 14], ghost: [5, 7, 13, 15], clap: [4, 12], bass: [0, 3, 6, 8, 10, 12, 14] },
+      notes: ["#ffe08a", "#ff9fb2", "#9ae8ff"],
+      look: { sky: ["#2b2d63", "#a45e8c", "#ffb48a"], hills: "#3b2b58", back: "#4a3163", front: "#1e1533", stars: 0.05, moon: 0, aurora: 0, rain: 0, sun: 1 },
+    },
   ];
+  // Lead notes for the solo: two octaves of the movement's pentatonic scale, plus the top root
+  MOVEMENTS.forEach((mv) => {
+    const base = mv.key + 12;
+    mv.leadNotes = [0, 12].flatMap((o) => mv.scale.map((d) => base + o + d)).concat(base + 24);
+  });
+
   const LAYERS = [
     { name: "Pad", at: 0 },
     { name: "Kick", at: 10 },
@@ -268,16 +366,27 @@
     { name: "Bass", at: 45 },
     { name: "Arp", at: 70 },
   ];
-  const BASS_STEPS = [0, 3, 6, 8, 10, 14];
   const ARP_ORDER = [0, 1, 2, 3, 2, 1, 0, 1];
+  const SOLO_STEPS = 64; // four bars
 
-  const chordAt = (step) => CHORDS[Math.floor(step / 32) % CHORDS.length];
   const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
 
+  // ================= Audio engine =================
   let ac = null, master, delaySend, noiseBuf;
-  let audioStart = 0, nextStepTime = 0, stepIndex = 0;
+  let stepDur = 60 / MOVEMENTS[0].bpm / 4; // one sixteenth note, in seconds
+  let nextStepTime = 0, stepIndex = 0;
+  let movementIdx = 0, phraseBase = 0; // step where the current movement began
+  let pendingMovement = null, transitionArmed = false;
   let musicLayer = 0, muted = false;
-  const events = []; // visual cues scheduled on the audio clock
+  const solo = { endStep: -1, lastNote: null };
+  const events = []; // visual cues, timed on the audio clock
+
+  const clock = () => (ac ? ac.currentTime : performance.now() / 1000);
+  const chordAt = (step) => {
+    const chords = MOVEMENTS[movementIdx].chords;
+    const k = Math.floor((step - phraseBase) / 32);
+    return chords[((k % chords.length) + chords.length) % chords.length];
+  };
 
   function initAudio() {
     if (ac) { ac.resume(); return; }
@@ -293,29 +402,29 @@
     master.connect(comp);
     comp.connect(ac.destination);
 
-    // A dotted-eighth echo that the chimes and arp feed into
+    // A dotted-eighth echo that the chimes, arp and solo feed into
     const delay = ac.createDelay(1);
-    delay.delayTime.value = STEP * 3;
+    delay.delayTime.value = stepDur * 3;
     const feedback = ac.createGain();
     feedback.gain.value = 0.38;
     const tone = ac.createBiquadFilter();
     tone.type = "lowpass";
     tone.frequency.value = 2600;
     delaySend = ac.createGain();
-    delaySend.gain.value = 1;
     delaySend.connect(delay);
     delay.connect(tone);
     tone.connect(feedback);
     feedback.connect(delay);
     tone.connect(master);
+    delaySend.delayNode = delay;
 
     noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
     const data = noiseBuf.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
 
-    audioStart = ac.currentTime + 0.1;
-    nextStepTime = audioStart;
+    nextStepTime = ac.currentTime + 0.1;
     stepIndex = 0;
+    phraseBase = 0;
     setInterval(scheduler, 25);
   }
 
@@ -323,39 +432,80 @@
     if (!ac || ac.state !== "running") return;
     // If the page stalled, jump ahead instead of playing a burst of late notes
     if (nextStepTime < ac.currentTime - 0.05) {
-      const skip = Math.ceil((ac.currentTime - nextStepTime) / STEP);
+      const skip = Math.ceil((ac.currentTime - nextStepTime) / stepDur);
       stepIndex += skip;
-      nextStepTime += skip * STEP;
+      nextStepTime += skip * stepDur;
     }
     while (nextStepTime < ac.currentTime + 0.12) {
       scheduleStep(stepIndex, nextStepTime);
       stepIndex++;
-      nextStepTime += STEP;
+      nextStepTime += stepDur;
     }
   }
 
   function scheduleStep(i, t) {
-    const s = i % 16;
+    let local = i - phraseBase;
+
+    // Two beats before a phrase ends, wind up for the next movement
+    if (local % 32 === 24 && pendingMovement !== null && pendingMovement !== movementIdx && !transitionArmed) {
+      transitionArmed = true;
+      riser(t, stepDur * 8);
+      if (musicLayer >= 1) {
+        for (let k = 0; k < 8; k++) clap(t + k * stepDur, 0.05 + k * 0.03);
+      }
+    }
+    // On the downbeat of the new phrase, switch key, tempo and groove
+    if (local % 32 === 0 && transitionArmed) {
+      transitionArmed = false;
+      if (pendingMovement !== null && pendingMovement !== movementIdx) {
+        movementIdx = pendingMovement;
+        phraseBase = i;
+        local = 0;
+        stepDur = 60 / MOVEMENTS[movementIdx].bpm / 4;
+        delaySend.delayNode.delayTime.setValueAtTime(stepDur * 3, t);
+        crash(t);
+        events.push({ t, type: "movement", idx: movementIdx });
+      }
+      pendingMovement = null;
+    }
+
+    const mv = MOVEMENTS[movementIdx];
+    const s = local % 16;
     const chord = chordAt(i);
-    if (i % 32 === 0) {
-      pad(chord, t, STEP * 32);
+    if (local % 32 === 0) {
+      pad(chord, t, stepDur * 32);
       events.push({ t, type: "chord", chord });
     }
-    if (musicLayer >= 1 && s % 4 === 0) {
+    if (s % 4 === 0) events.push({ t, type: "beat", bar: Math.floor(local / 16) + 1, beat: s / 4 + 1 });
+
+    if (musicLayer >= 1 && mv.groove.kick.includes(s)) {
       kick(t);
       events.push({ t, type: "kick" });
     }
     if (musicLayer >= 2) {
-      if (s % 4 === 2) hat(t, 0.09, 0.05);
-      else if (s === 15 || s === 7) hat(t, 0.04, 0.03);
+      if (mv.groove.hat.includes(s)) hat(t, 0.09, 0.05);
+      else if (mv.groove.ghost.includes(s)) hat(t, 0.035, 0.03);
+      if (mv.groove.clap.includes(s)) clap(t, 0.16);
     }
-    if (musicLayer >= 3 && BASS_STEPS.includes(s)) {
-      bass(chord.bass + (s === 10 ? 12 : 0), t, STEP * 1.7);
+    if (musicLayer >= 3 && mv.groove.bass.includes(s)) {
+      bass(chord.bass + (s === 10 ? 12 : 0), t, stepDur * 1.7);
     }
     if (musicLayer >= 4 && s % 2 === 0) {
       const k = ARP_ORDER[(s / 2) % ARP_ORDER.length];
       const m = k === 3 ? chord.tones[0] + 12 : chord.tones[k];
       pluck(mtof(m + 12), t, 0.06);
+    }
+
+    // The solo: the firefly's height picks the note, on every eighth note
+    if (i < solo.endStep && s % 2 === 0) {
+      const frac = 1 - Math.min(1, Math.max(0, player.y / H));
+      const notes = mv.leadNotes;
+      const m = notes[Math.round(frac * (notes.length - 1))];
+      if (m !== solo.lastNote || player.speed > 40 || s % 8 === 0) {
+        lead(mtof(m), t, stepDur * 1.9);
+        events.push({ t, type: "lead" });
+        solo.lastNote = m;
+      }
     }
   }
 
@@ -367,14 +517,22 @@
     return g;
   }
 
+  function noise(t, dur) {
+    const src = ac.createBufferSource();
+    src.buffer = noiseBuf;
+    src.start(t, Math.random() * 0.4);
+    src.stop(t + dur);
+    return src;
+  }
+
   function pad(chord, t, dur) {
     const filter = ac.createBiquadFilter();
     filter.type = "lowpass";
     filter.frequency.value = 850;
     const g = ac.createGain();
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(0.045, t + 1.4);
-    g.gain.setValueAtTime(0.045, t + dur - 0.2);
+    g.gain.linearRampToValueAtTime(0.04, t + 1.4);
+    g.gain.setValueAtTime(0.04, t + dur - 0.2);
     g.gain.linearRampToValueAtTime(0.0001, t + dur + 1.2);
     filter.connect(g);
     g.connect(master);
@@ -407,8 +565,7 @@
   }
 
   function hat(t, vol, len) {
-    const src = ac.createBufferSource();
-    src.buffer = noiseBuf;
+    const src = noise(t, len + 0.01);
     const hp = ac.createBiquadFilter();
     hp.type = "highpass";
     hp.frequency.value = 7000;
@@ -418,8 +575,45 @@
     src.connect(hp);
     hp.connect(g);
     g.connect(master);
-    src.start(t, Math.random() * 0.5);
-    src.stop(t + len + 0.01);
+  }
+
+  function clap(t, vol) {
+    const src = noise(t, 0.2);
+    const bp = ac.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 1500;
+    bp.Q.value = 1.2;
+    const g = envGain(t, vol, 0.003, 0.16);
+    src.connect(bp);
+    bp.connect(g);
+    g.connect(master);
+  }
+
+  function riser(t, dur) {
+    const src = noise(t, dur + 0.05);
+    const bp = ac.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.Q.value = 3;
+    bp.frequency.setValueAtTime(400, t);
+    bp.frequency.exponentialRampToValueAtTime(7000, t + dur);
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.28, t + dur);
+    g.gain.linearRampToValueAtTime(0.0001, t + dur + 0.04);
+    src.connect(bp);
+    bp.connect(g);
+    g.connect(master);
+  }
+
+  function crash(t) {
+    const src = noise(t, 2);
+    const hp = ac.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 4500;
+    const g = envGain(t, 0.22, 0.005, 1.8);
+    src.connect(hp);
+    hp.connect(g);
+    g.connect(master);
   }
 
   function bass(m, t, dur) {
@@ -471,9 +665,40 @@
     });
   }
 
+  function lead(freq, t, dur) {
+    const f = ac.createBiquadFilter();
+    f.type = "lowpass";
+    f.Q.value = 3;
+    f.frequency.setValueAtTime(3400, t);
+    f.frequency.exponentialRampToValueAtTime(1100, t + dur);
+    const g = envGain(t, 0.075, 0.012, dur);
+    const vib = ac.createOscillator();
+    vib.frequency.value = 5.5;
+    const vibDepth = ac.createGain();
+    vibDepth.gain.value = 7;
+    vib.connect(vibDepth);
+    ["sawtooth", "square"].forEach((type, k) => {
+      const o = ac.createOscillator();
+      o.type = type;
+      o.frequency.value = freq;
+      o.detune.value = k ? -6 : 6;
+      vibDepth.connect(o.detune);
+      o.connect(f);
+      o.start(t);
+      o.stop(t + dur + 0.05);
+    });
+    vib.start(t);
+    vib.stop(t + dur + 0.05);
+    f.connect(g);
+    g.connect(master);
+    const send = ac.createGain();
+    send.gain.value = 0.35;
+    g.connect(send);
+    send.connect(delaySend);
+  }
+
   function crunch(t) {
-    const src = ac.createBufferSource();
-    src.buffer = noiseBuf;
+    const src = noise(t, 0.5);
     const bp = ac.createBiquadFilter();
     bp.type = "bandpass";
     bp.Q.value = 2;
@@ -483,13 +708,11 @@
     src.connect(bp);
     bp.connect(g);
     g.connect(master);
-    src.start(t);
-    src.stop(t + 0.5);
-    [110, 116.5].forEach((f) => {
+    [110, 116.5].forEach((fr) => {
       const o = ac.createOscillator();
       o.type = "sawtooth";
-      o.frequency.setValueAtTime(f, t);
-      o.frequency.exponentialRampToValueAtTime(f * 0.6, t + 0.5);
+      o.frequency.setValueAtTime(fr, t);
+      o.frequency.exponentialRampToValueAtTime(fr * 0.6, t + 0.5);
       const og = envGain(t, 0.12, 0.005, 0.5);
       o.connect(og);
       og.connect(master);
@@ -498,40 +721,39 @@
     });
   }
 
-  // Returns the time and step number of the next sixteenth note, so catches land on the grid
-  function nextGridSlot() {
-    const n = Math.ceil((ac.currentTime - audioStart) / STEP + 0.02);
-    return { t: audioStart + n * STEP, step: n };
+  // The next sixteenth-note slot on the grid, so catches always land in time
+  function gridSlot() {
+    const ahead = Math.max(0, Math.floor((nextStepTime - ac.currentTime - 0.01) / stepDur));
+    return { t: nextStepTime - ahead * stepDur, step: stepIndex - ahead };
+  }
+
+  function chordLadder(step) {
+    const tones = chordAt(step).tones;
+    return [...tones, ...tones.map((m) => m + 12), tones[0] + 24];
   }
 
   function playCatch(streak) {
     if (!ac) return;
-    const { t, step } = nextGridSlot();
-    const tones = chordAt(step).tones;
-    const ladder = [...tones, ...tones.map((m) => m + 12), tones[0] + 24];
+    const { t, step } = gridSlot();
+    const ladder = chordLadder(step);
     bell(mtof(ladder[(streak - 1) % ladder.length] + 12), t);
   }
 
   function playFarewell() {
     if (!ac) return;
-    const { t, step } = nextGridSlot();
+    const { t, step } = gridSlot();
     const tones = chordAt(step).tones;
-    [tones[2] + 12, tones[1] + 12, tones[0] + 12, tones[0]].forEach((m, k) => bell(mtof(m), t + k * STEP * 2, 0.16));
+    [tones[2] + 12, tones[1] + 12, tones[0] + 12, tones[0]].forEach((m, k) => bell(mtof(m), t + k * stepDur * 2, 0.16));
   }
 
-  // ---------- Drawing setup ----------
+  // ================= Canvas and scenery =================
   const cv = document.getElementById("scene");
   const g = cv.getContext("2d");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let W = 0, H = 0, DPR = 1;
-  let sky, stars = [], grassBack = [], grassFront = [], hills = [];
+  let stars = [], grassBack = [], grassFront = [], hills = [], rain = [];
 
-  const COLORS = {
-    notes: ["#7fe0cf", "#f4a3c0", "#c4b2ff"],
-    amber: "#ffc65c",
-    moon: "#f3ecd2",
-    static: "#ff5d8f",
-  };
+  const COLORS = { amber: "#ffc65c", gold: "#ffd76a", moon: "#f3ecd2", static: "#ff5d8f", hush: "#dfe8ff" };
 
   function glowSprite(color, size) {
     const c = document.createElement("canvas");
@@ -546,9 +768,44 @@
     x.fillRect(0, 0, size * 2, size * 2);
     return c;
   }
-  const noteGlow = COLORS.notes.map((c) => glowSprite(c, 48));
+  function curtainSprite(rgb) {
+    const c = document.createElement("canvas");
+    c.width = 10;
+    c.height = 160;
+    const x = c.getContext("2d");
+    const grad = x.createLinearGradient(0, 0, 0, 160);
+    grad.addColorStop(0, `rgba(${rgb},0)`);
+    grad.addColorStop(0.15, `rgba(${rgb},0.9)`);
+    grad.addColorStop(1, `rgba(${rgb},0)`);
+    x.fillStyle = grad;
+    x.fillRect(0, 0, 10, 160);
+    return c;
+  }
+  const noteSprites = MOVEMENTS.map((mv) => mv.notes.map((c) => glowSprite(c, 48)));
   const fireflyGlow = glowSprite(COLORS.amber, 64);
+  const goldGlow = glowSprite(COLORS.gold, 64);
   const staticGlow = glowSprite(COLORS.static, 40);
+  const hushGlow = glowSprite(COLORS.hush, 44);
+  const curtains = ["120,255,180", "110,210,255", "200,150,255"].map(curtainSprite);
+
+  // The scene eases toward the current movement's look
+  const hexToRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const css = (a, alpha = 1) => `rgba(${a.map(Math.round).join(",")},${alpha})`;
+  function lookToScene(look) {
+    return {
+      sky: look.sky.map(hexToRgb), hills: hexToRgb(look.hills), back: hexToRgb(look.back), front: hexToRgb(look.front),
+      stars: look.stars, moon: look.moon, aurora: look.aurora, rain: look.rain, sun: look.sun,
+    };
+  }
+  let scene = lookToScene(MOVEMENTS[0].look);
+  let sceneTarget = lookToScene(MOVEMENTS[0].look);
+  function blendScene(dt) {
+    const k = 1 - Math.exp(-dt * 0.7);
+    const mix = (a, b) => a.map((v, i) => v + (b[i] - v) * k);
+    scene.sky = scene.sky.map((c, i) => mix(c, sceneTarget.sky[i]));
+    ["hills", "back", "front"].forEach((key) => { scene[key] = mix(scene[key], sceneTarget[key]); });
+    ["stars", "moon", "aurora", "rain", "sun"].forEach((key) => { scene[key] += (sceneTarget[key] - scene[key]) * k; });
+  }
 
   function resize() {
     DPR = Math.min(2, window.devicePixelRatio || 1);
@@ -558,23 +815,16 @@
     cv.height = Math.round(H * DPR);
     g.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-    sky = g.createLinearGradient(0, 0, 0, H);
-    sky.addColorStop(0, "#0b1229");
-    sky.addColorStop(0.65, "#1a2150");
-    sky.addColorStop(1, "#2a2555");
-
     stars = Array.from({ length: Math.round((W * H) / 5000) }, () => ({
       x: Math.random() * W,
       y: Math.random() * H * 0.7,
       r: Math.random() * 1.2 + 0.3,
       tw: Math.random() * Math.PI * 2,
     }));
-
     hills = [];
     for (let x = 0; x <= W + 20; x += 20) {
       hills.push(H * 0.8 - Math.sin(x * 0.004) * 30 - Math.sin(x * 0.011 + 1) * 14);
     }
-
     const blades = (count, minH, maxH) => Array.from({ length: count }, () => ({
       x: Math.random() * W,
       h: minH + Math.random() * (maxH - minH),
@@ -583,11 +833,14 @@
     }));
     grassBack = blades(Math.round(W / 5), 20, 60);
     grassFront = blades(Math.round(W / 7), 30, 90);
+    rain = Array.from({ length: Math.round(W / 8) }, () => ({
+      x: Math.random() * W, y: Math.random() * H, len: 8 + Math.random() * 14, speed: 500 + Math.random() * 300,
+    }));
   }
   window.addEventListener("resize", resize);
   resize();
 
-  // ---------- Game state ----------
+  // ================= Game state =================
   const BEST_KEY = "fireflyjam.best";
   const loadBest = () => { try { return Number(localStorage.getItem(BEST_KEY)) || 0; } catch { return 0; } };
   const saveBest = (v) => { try { localStorage.setItem(BEST_KEY, String(v)); } catch {} };
@@ -599,35 +852,52 @@
     streak: 0,
     mult: 1,
     best: loadBest(),
+    reached: 0, // furthest movement reached this run
     orbs: [],
     hazards: [],
     sparks: [],
     rings: [],
+    waves: [],
     floats: [],
     orbTimer: 0,
     hazardTimer: 3,
     invincible: 0,
     shake: 0,
     pulse: 0,
+    flash: 0,
     time: 0,
   };
-  const player = { x: W / 2, y: H / 2, tx: W / 2, ty: H / 2, r: 11, trail: [] };
+  const player = { x: W / 2, y: H / 2, tx: W / 2, ty: H / 2, r: 11, trail: [], speed: 0 };
   const keys = new Set();
 
   const $ = (id) => document.getElementById(id);
   const hud = {
     score: $("score"), mult: $("mult"), chord: $("chord"), pos: $("pos"),
+    mvNum: $("movement-num"), mvName: $("movement-name"),
     lives: [...document.querySelectorAll("#lives i")],
     layers: [...document.querySelectorAll("#layers li")],
     toast: $("toast"),
   };
-  let toastTimer = 0;
 
-  function showToast(text) {
-    hud.toast.textContent = text;
+  // Toasts queue up so a new instrument and a new movement don't talk over each other
+  const toastQueue = [];
+  let toastBusy = false;
+  function showToast(text, sub = "", gold = false) {
+    toastQueue.push({ text, sub, gold });
+    if (!toastBusy) nextToast();
+  }
+  function nextToast() {
+    const item = toastQueue.shift();
+    if (!item) { toastBusy = false; return; }
+    toastBusy = true;
+    hud.toast.querySelector("b").textContent = item.text;
+    hud.toast.querySelector("span").textContent = item.sub;
+    hud.toast.classList.toggle("gold", item.gold);
     hud.toast.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => hud.toast.classList.remove("show"), 2200);
+    setTimeout(() => {
+      hud.toast.classList.remove("show");
+      setTimeout(nextToast, 450);
+    }, 2000);
   }
 
   function updateBestLabel() {
@@ -642,18 +912,35 @@
     hud.layers.forEach((li, k) => li.classList.toggle("on", k <= n));
   }
 
+  const soloActive = () => ac && state.mode === "play" && solo.endStep > gridSlot().step;
+  const soloLeft = () => (soloActive() ? (solo.endStep - gridSlot().step) / SOLO_STEPS : 0);
+
   function refreshHud() {
     hud.score.textContent = state.score;
-    hud.mult.textContent = `×${state.mult}`;
+    const on = soloActive();
+    hud.mult.textContent = on ? `×${state.mult} · solo ×2` : `×${state.mult}`;
+    hud.mult.classList.toggle("solo", on);
     hud.lives.forEach((el, k) => el.classList.toggle("gone", k >= state.lives));
+  }
+
+  function showMovement(idx) {
+    const mv = MOVEMENTS[idx];
+    sceneTarget = lookToScene(mv.look);
+    hud.mvNum.textContent = `Movement ${mv.numeral}`;
+    hud.mvName.textContent = mv.name;
+    document.documentElement.style.setProperty("--accent", mv.notes[0]);
   }
 
   function startGame() {
     initAudio();
     Object.assign(state, {
-      mode: "play", score: 0, lives: 3, streak: 0, mult: 1,
+      mode: "play", score: 0, lives: 3, streak: 0, mult: 1, reached: 0,
       hazards: [], orbTimer: 0.3, hazardTimer: 3, invincible: 0, shake: 0,
     });
+    state.orbs = state.orbs.filter((o) => o.kind === "note");
+    solo.endStep = -1;
+    // A new run always starts back at Moonrise
+    if (movementIdx !== 0) pendingMovement = 0;
     player.x = player.tx = W / 2;
     player.y = player.ty = H / 2;
     player.trail = [];
@@ -661,28 +948,27 @@
     refreshHud();
     $("title-screen").hidden = true;
     $("over-screen").hidden = true;
-    cv.focus?.();
   }
 
   function endGame() {
     state.mode = "over";
+    solo.endStep = -1;
     playFarewell();
     setLayer(0, false);
     const newBest = state.score > state.best;
     if (newBest) { state.best = state.score; saveBest(state.best); }
     $("final-score").textContent = state.score;
     $("final-best").textContent = state.best;
-    $("over-note").textContent = newBest && state.score > 0
-      ? "New best! The fireflies will remember that one."
-      : `Reach ${nextGoal()} to bring in the next instrument.`;
+    const mv = MOVEMENTS[state.reached];
+    const next = MOVEMENTS[state.reached + 1];
+    let note = `You reached Movement ${mv.numeral}, ${mv.name}.`;
+    if (newBest && state.score > 0) note += " New best! The fireflies will remember that one.";
+    else if (next) note += ` Score ${next.at} to hear ${next.name}.`;
+    else note += " That's the whole song. Beautiful.";
+    $("over-note").textContent = note;
     updateBestLabel();
     $("over-screen").hidden = false;
     $("again").focus();
-  }
-
-  function nextGoal() {
-    const next = LAYERS.find((l) => l.at > state.score);
-    return next ? `${next.at} points` : "a new high score";
   }
 
   $("start").addEventListener("click", startGame);
@@ -695,21 +981,20 @@
     if (master) master.gain.setTargetAtTime(muted ? 0 : 0.8, ac.currentTime, 0.05);
   }
 
-  // ---------- Input ----------
-  cv.addEventListener("pointermove", (e) => {
+  // ================= Input =================
+  function aim(e) {
     player.tx = e.clientX;
     player.ty = e.clientY - (e.pointerType === "touch" ? 50 : 0);
-  });
-  cv.addEventListener("pointerdown", (e) => {
-    player.tx = e.clientX;
-    player.ty = e.clientY - (e.pointerType === "touch" ? 50 : 0);
-  });
+  }
+  cv.addEventListener("pointermove", aim);
+  cv.addEventListener("pointerdown", aim);
   window.addEventListener("keydown", (e) => {
-    if (e.key.startsWith("Arrow") || "wasd".includes(e.key.toLowerCase()) && e.key.length === 1) {
-      keys.add(e.key.toLowerCase());
+    const k = e.key.toLowerCase();
+    if (e.key.startsWith("Arrow") || (e.key.length === 1 && "wasd".includes(k))) {
+      keys.add(k);
       if (state.mode === "play") e.preventDefault();
     }
-    if (e.key.toLowerCase() === "m" && !e.repeat) toggleMute();
+    if (k === "m" && !e.repeat) toggleMute();
     if ((e.key === "Enter" || e.key === " ") && state.mode !== "play" && document.activeElement?.tagName !== "BUTTON") {
       e.preventDefault();
       startGame();
@@ -724,7 +1009,7 @@
     if (paused) ac.suspend(); else ac.resume();
   });
 
-  // ---------- Spawning ----------
+  // ================= Spawning =================
   function fromEdge(speed) {
     const side = Math.floor(Math.random() * 4);
     const m = 30;
@@ -741,18 +1026,29 @@
 
   function spawnOrb() {
     if (state.orbs.length > 14) return;
+    let kind = "note";
+    if (state.mode === "play") {
+      const has = (k) => state.orbs.some((o) => o.kind === k);
+      const threats = state.hazards.filter((h) => h.doomAt == null).length;
+      if (!has("hush") && threats >= 3 && Math.random() < 0.2) kind = "hush";
+      else if (!has("gold") && !soloActive() && state.score >= 12 && Math.random() < 0.06) kind = "gold";
+    }
+    const tone = Math.floor(Math.random() * 3);
     state.orbs.push({
-      ...fromEdge(35 + Math.random() * 35),
-      r: 9,
-      tone: Math.floor(Math.random() * 3),
+      ...fromEdge(kind === "note" ? 35 + Math.random() * 35 : 32),
+      kind,
+      r: kind === "note" ? 9 : 12,
+      tone,
+      sprite: noteSprites[movementIdx][tone],
+      color: MOVEMENTS[movementIdx].notes[tone],
       wobble: Math.random() * Math.PI * 2,
       age: 0,
     });
   }
 
   function spawnHazard() {
-    const speed = 55 + Math.min(110, state.score * 1.1) + Math.random() * 25;
-    state.hazards.push({ ...fromEdge(speed), r: 14, spin: Math.random() * 6, age: 0 });
+    const speed = 55 + Math.min(110, state.score * 0.6) + Math.random() * 25;
+    state.hazards.push({ ...fromEdge(speed), r: 14, spin: Math.random() * 6, age: 0, doomAt: null });
   }
 
   const offscreen = (o) => o.age > 1 && (o.x < -80 || o.x > W + 80 || o.y < -80 || o.y > H + 80);
@@ -765,23 +1061,45 @@
     }
   }
 
-  // ---------- Update ----------
+  // ================= Update =================
+  function handleEvent(ev) {
+    if (ev.type === "kick") state.pulse = 1;
+    if (ev.type === "chord") {
+      hud.chord.textContent = ev.chord.name;
+      if (scene.rain > 0.5 && Math.random() < 0.5 && !reduceMotion) state.flash = 1;
+    }
+    if (ev.type === "beat") {
+      const pos = `${ev.bar} · ${ev.beat}`;
+      if (hud.pos.textContent !== pos) hud.pos.textContent = pos;
+    }
+    if (ev.type === "lead" && state.mode === "play") {
+      state.floats.push({ x: player.x + (Math.random() - 0.5) * 16, y: player.y - 20, text: "♪", life: 1, color: COLORS.gold, big: true });
+    }
+    if (ev.type === "movement") {
+      showMovement(ev.idx);
+      if (!reduceMotion) state.flash = Math.max(state.flash, 0.6);
+      const mv = MOVEMENTS[ev.idx];
+      if (state.mode === "play" && ev.idx > 0) {
+        state.reached = Math.max(state.reached, ev.idx);
+        let sub = "";
+        if (state.lives < 3) { state.lives++; sub = "+1 life"; }
+        else { state.score += 10; sub = "+10 bonus"; }
+        refreshHud();
+        showToast(`${mv.numeral} · ${mv.name}`, `${mv.bpm} BPM · ${sub}`);
+      }
+    }
+  }
+
   function update(dt) {
     state.time += dt;
     state.pulse = Math.max(0, state.pulse - dt * 3.5);
+    state.flash = Math.max(0, state.flash - dt * 2.5);
     state.shake = Math.max(0, state.shake - dt * 30);
     state.invincible = Math.max(0, state.invincible - dt);
+    blendScene(dt);
 
-    // Visual cues timed to the audio clock
     if (ac) {
-      while (events.length && events[0].t <= ac.currentTime) {
-        const ev = events.shift();
-        if (ev.type === "kick") state.pulse = 1;
-        if (ev.type === "chord") hud.chord.textContent = ev.chord.name;
-      }
-      const n = Math.max(0, Math.floor((ac.currentTime - audioStart) / STEP));
-      const pos = `${Math.floor(n / 16) + 1} · ${Math.floor((n % 16) / 4) + 1}`;
-      if (hud.pos.textContent !== pos) hud.pos.textContent = pos;
+      while (events.length && events[0].t <= ac.currentTime) handleEvent(events.shift());
     }
 
     state.orbTimer -= dt;
@@ -790,11 +1108,12 @@
       state.orbTimer = state.mode === "play" ? 0.6 + Math.random() * 0.5 : 1.1 + Math.random();
     }
 
+    const soloOn = soloActive();
     if (state.mode === "play") {
       state.hazardTimer -= dt;
       if (state.hazardTimer <= 0) {
         spawnHazard();
-        state.hazardTimer = Math.max(0.8, 3 - state.score * 0.025) * (0.7 + Math.random() * 0.6);
+        state.hazardTimer = Math.max(0.8, 3 - state.score * 0.012) * (0.7 + Math.random() * 0.6);
       }
 
       let kx = 0, ky = 0;
@@ -810,8 +1129,11 @@
       player.tx = Math.min(W - 12, Math.max(12, player.tx));
       player.ty = Math.min(H - 12, Math.max(12, player.ty));
       const ease = Math.min(1, dt * (kx || ky ? 6 : 12));
+      const px = player.x, py = player.y;
       player.x += (player.tx - player.x) * ease;
       player.y += (player.ty - player.y) * ease;
+      const v = dt > 0 ? Math.hypot(player.x - px, player.y - py) / dt : 0;
+      player.speed += (v - player.speed) * Math.min(1, dt * 10);
       player.trail.push({ x: player.x, y: player.y });
       if (player.trail.length > 18) player.trail.shift();
     }
@@ -821,13 +1143,28 @@
       o.wobble += dt * 2;
       o.x += o.vx * dt + Math.cos(o.wobble) * 0.3;
       o.y += o.vy * dt + Math.sin(o.wobble * 1.3) * 0.3;
+      // During a solo, nearby notes drift toward the firefly
+      if (soloOn && o.kind === "note") {
+        const dx = player.x - o.x, dy = player.y - o.y, d = Math.hypot(dx, dy);
+        if (d < 180 && d > 1) {
+          o.x += (dx / d) * 260 * dt;
+          o.y += (dy / d) * 260 * dt;
+        }
+      }
     }
+    const now = clock();
     for (const h of state.hazards) {
       h.age += dt;
       h.spin += dt * 3;
       h.x += h.vx * dt;
       h.y += h.vy * dt;
+      if (h.doomAt != null && now >= h.doomAt && !h.popped) {
+        h.popped = true;
+        burst(h.x, h.y, COLORS.hush, 16, 160);
+        state.rings.push({ x: h.x, y: h.y, life: 1, color: COLORS.hush });
+      }
     }
+    state.hazards = state.hazards.filter((h) => !h.popped);
 
     if (state.mode === "play") {
       state.orbs = state.orbs.filter((o) => {
@@ -837,7 +1174,7 @@
       });
       if (state.invincible <= 0) {
         for (const h of state.hazards) {
-          if (Math.hypot(h.x - player.x, h.y - player.y) < h.r + player.r - 4) {
+          if (h.doomAt == null && Math.hypot(h.x - player.x, h.y - player.y) < h.r + player.r - 4) {
             getHit(h);
             break;
           }
@@ -857,22 +1194,84 @@
     state.sparks = state.sparks.filter((s) => s.life > 0);
     for (const r of state.rings) r.life -= dt * 1.8;
     state.rings = state.rings.filter((r) => r.life > 0);
+    for (const w of state.waves) { w.r += dt * 900; w.life -= dt * 1.1; }
+    state.waves = state.waves.filter((w) => w.life > 0);
     for (const f of state.floats) { f.y -= dt * 30; f.life -= dt; }
     state.floats = state.floats.filter((f) => f.life > 0);
+    for (const d of rain) {
+      d.y += d.speed * dt;
+      d.x -= d.speed * 0.25 * dt;
+      if (d.y > H) { d.y = -20; d.x = Math.random() * (W + 100); }
+    }
+
+    // Keep the solo label in step with the music
+    if (state.mode === "play" && hud.mult.classList.contains("solo") !== soloOn) refreshHud();
   }
 
   function catchOrb(o) {
+    if (o.kind === "gold") return catchGold(o);
+    if (o.kind === "hush") return catchHush(o);
     state.streak++;
     state.mult = 1 + Math.min(3, Math.floor(state.streak / 6));
-    state.score += state.mult;
+    const gain = state.mult * (soloActive() ? 2 : 1);
+    state.score += gain;
     playCatch(state.streak);
-    const color = COLORS.notes[o.tone];
-    burst(o.x, o.y, color, 14, 140);
-    state.rings.push({ x: o.x, y: o.y, life: 1, color });
-    state.floats.push({ x: o.x, y: o.y - 14, text: `+${state.mult}`, life: 0.9, color });
+    burst(o.x, o.y, o.color, 14, 140);
+    state.rings.push({ x: o.x, y: o.y, life: 1, color: o.color });
+    state.floats.push({ x: o.x, y: o.y - 14, text: `+${gain}`, life: 0.9, color: o.color });
+    scoreChanged();
+  }
+
+  function catchGold(o) {
+    const gain = 5 * state.mult;
+    state.score += gain;
+    if (ac) {
+      const { t, step } = gridSlot();
+      // The solo begins on the next beat and lasts four bars
+      const toBeat = (4 - ((step - phraseBase) % 4)) % 4;
+      solo.endStep = step + toBeat + SOLO_STEPS;
+      solo.lastNote = null;
+      const ladder = chordLadder(step);
+      ladder.slice(0, 5).forEach((m, k) => bell(mtof(m + 12), t + k * stepDur * 0.5, 0.14));
+    }
+    burst(o.x, o.y, COLORS.gold, 30, 220);
+    state.rings.push({ x: o.x, y: o.y, life: 1, color: COLORS.gold });
+    state.floats.push({ x: o.x, y: o.y - 16, text: `+${gain}`, life: 1, color: COLORS.gold });
+    showToast("Solo!", "Fly up and down to play the melody", true);
+    scoreChanged();
+  }
+
+  function catchHush(o) {
+    state.waves.push({ x: o.x, y: o.y, r: 0, life: 1 });
+    burst(o.x, o.y, COLORS.hush, 20, 180);
+    const targets = state.hazards
+      .filter((h) => h.doomAt == null)
+      .sort((a, b) => Math.hypot(a.x - o.x, a.y - o.y) - Math.hypot(b.x - o.x, b.y - o.y));
+    if (ac) {
+      // Each blob pops on its own sixteenth note, climbing the chord
+      const { t, step } = gridSlot();
+      const ladder = chordLadder(step);
+      targets.forEach((h, k) => {
+        const tk = t + (k + 1) * stepDur;
+        h.doomAt = tk;
+        pluck(mtof(ladder[k % ladder.length] + 12), tk, 0.12);
+      });
+    } else {
+      targets.forEach((h, k) => { h.doomAt = clock() + (k + 1) * 0.1; });
+    }
+    state.score += 3;
+    state.floats.push({ x: o.x, y: o.y - 16, text: "hush", life: 1, color: COLORS.hush });
+    state.hazardTimer = Math.max(state.hazardTimer, 2.5);
+    scoreChanged();
+  }
+
+  function scoreChanged() {
     let layer = 0;
     LAYERS.forEach((l, k) => { if (state.score >= l.at) layer = k; });
     setLayer(layer, true);
+    let target = 0;
+    MOVEMENTS.forEach((mv, k) => { if (state.score >= mv.at) target = k; });
+    if (target > movementIdx && pendingMovement !== target) pendingMovement = target;
     refreshHud();
   }
 
@@ -884,31 +1283,53 @@
     state.shake = reduceMotion ? 0 : 14;
     if (ac) crunch(ac.currentTime);
     burst(player.x, player.y, COLORS.static, 22, 220);
-    h.age = 99;
     h.x = -1000; // remove the blob that hit you
+    h.age = 99;
     refreshHud();
     if (state.lives <= 0) endGame();
   }
 
-  // ---------- Draw ----------
+  // ================= Draw =================
   function drawBackground() {
+    const sky = g.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, css(scene.sky[0]));
+    sky.addColorStop(0.65, css(scene.sky[1]));
+    sky.addColorStop(1, css(scene.sky[2]));
     g.fillStyle = sky;
     g.fillRect(0, 0, W, H);
 
-    for (const s of stars) {
-      const a = 0.35 + 0.35 * Math.sin(state.time * 1.5 + s.tw);
-      g.globalAlpha = a;
+    if (scene.stars > 0.01) {
       g.fillStyle = COLORS.moon;
-      g.fillRect(s.x, s.y, s.r, s.r);
+      for (const s of stars) {
+        g.globalAlpha = scene.stars * (0.35 + 0.35 * Math.sin(state.time * 1.5 + s.tw));
+        g.fillRect(s.x, s.y, s.r, s.r);
+      }
+      g.globalAlpha = 1;
     }
-    g.globalAlpha = 1;
 
-    // Moon
+    drawAurora();
+    drawSun();
+    drawMoon();
+
+    g.fillStyle = css(scene.hills);
+    g.beginPath();
+    g.moveTo(0, H);
+    hills.forEach((y, k) => g.lineTo(k * 20, y));
+    g.lineTo(W, H);
+    g.closePath();
+    g.fill();
+
+    drawGrass(grassBack, css(scene.back), 0.6);
+  }
+
+  function drawMoon() {
+    if (scene.moon < 0.01) return;
     const mx = W * 0.82, my = H * 0.18, mr = Math.min(W, H) * 0.05 + 10;
-    const moonHalo = g.createRadialGradient(mx, my, mr * 0.8, mx, my, mr * 4);
-    moonHalo.addColorStop(0, "rgba(243,236,210,0.18)");
-    moonHalo.addColorStop(1, "rgba(243,236,210,0)");
-    g.fillStyle = moonHalo;
+    g.globalAlpha = scene.moon;
+    const halo = g.createRadialGradient(mx, my, mr * 0.8, mx, my, mr * 4);
+    halo.addColorStop(0, "rgba(243,236,210,0.18)");
+    halo.addColorStop(1, "rgba(243,236,210,0)");
+    g.fillStyle = halo;
     g.fillRect(mx - mr * 4, my - mr * 4, mr * 8, mr * 8);
     // Crescent: clip away a circle so the halo shows through the dark side
     g.save();
@@ -921,17 +1342,49 @@
     g.arc(mx, my, mr, 0, Math.PI * 2);
     g.fill();
     g.restore();
+    g.globalAlpha = 1;
+  }
 
-    // Hills
-    g.fillStyle = "#141a3d";
+  function drawSun() {
+    if (scene.sun < 0.01) return;
+    const sr = Math.min(W, H) * 0.09 + 12;
+    const sx = W * 0.3, sy = H * 0.84 - scene.sun * H * 0.08;
+    const halo = g.createRadialGradient(sx, sy, sr * 0.6, sx, sy, sr * 5);
+    halo.addColorStop(0, `rgba(255,210,150,${0.45 * scene.sun})`);
+    halo.addColorStop(1, "rgba(255,190,140,0)");
+    g.fillStyle = halo;
+    g.fillRect(sx - sr * 5, sy - sr * 5, sr * 10, sr * 10);
+    g.fillStyle = `rgba(255,230,180,${scene.sun})`;
     g.beginPath();
-    g.moveTo(0, H);
-    hills.forEach((y, k) => g.lineTo(k * 20, y));
-    g.lineTo(W, H);
-    g.closePath();
+    g.arc(sx, sy, sr, 0, Math.PI * 2);
     g.fill();
+  }
 
-    drawGrass(grassBack, "#10163a", 0.6);
+  function drawAurora() {
+    if (scene.aurora < 0.01) return;
+    g.globalCompositeOperation = "lighter";
+    curtains.forEach((sprite, r) => {
+      const base = H * (0.08 + r * 0.07);
+      for (let x = -10; x <= W; x += 8) {
+        const y = base + Math.sin(x * 0.004 + state.time * 0.25 + r * 2) * 30 + Math.sin(x * 0.011 - state.time * 0.4 + r) * 12;
+        g.globalAlpha = scene.aurora * (0.12 + 0.1 * Math.sin(x * 0.02 + state.time * 0.8 + r));
+        g.drawImage(sprite, x, y, 10, 150 + Math.sin(x * 0.007 + r) * 40);
+      }
+    });
+    g.globalAlpha = 1;
+    g.globalCompositeOperation = "source-over";
+  }
+
+  function drawRain() {
+    if (scene.rain < 0.01) return;
+    g.strokeStyle = `rgba(180,200,255,${0.3 * scene.rain})`;
+    g.lineWidth = 1;
+    g.beginPath();
+    for (const d of rain) {
+      g.moveTo(d.x, d.y);
+      g.lineTo(d.x - d.len * 0.25, d.y + d.len);
+    }
+    g.stroke();
   }
 
   function drawGrass(blades, color, sway) {
@@ -939,40 +1392,80 @@
     g.lineWidth = 2;
     g.lineCap = "round";
     const beat = reduceMotion ? 0 : state.pulse * 6;
+    const wind = 1 + scene.rain * 1.5;
     g.beginPath();
     for (const b of blades) {
-      const bend = Math.sin(state.time * 1.2 + b.phase) * (4 + beat) * sway + b.lean;
+      const bend = Math.sin(state.time * 1.2 * wind + b.phase) * (4 + beat) * sway * wind + b.lean;
       g.moveTo(b.x, H + 2);
       g.quadraticCurveTo(b.x + bend * 0.3, H - b.h * 0.5, b.x + bend, H - b.h);
     }
     g.stroke();
   }
 
+  function starPath(x, y, r, rot) {
+    g.beginPath();
+    for (let k = 0; k < 10; k++) {
+      const a = rot + (k * Math.PI) / 5 - Math.PI / 2;
+      const rr = k % 2 ? r * 0.45 : r;
+      const px = x + Math.cos(a) * rr, py = y + Math.sin(a) * rr;
+      if (k === 0) g.moveTo(px, py); else g.lineTo(px, py);
+    }
+    g.closePath();
+  }
+
   function drawOrbs() {
-    g.globalCompositeOperation = "lighter";
     for (const o of state.orbs) {
-      const size = 34 + state.pulse * 10 + Math.sin(o.wobble * 2) * 3;
-      g.drawImage(noteGlow[o.tone], o.x - size, o.y - size, size * 2, size * 2);
+      g.globalCompositeOperation = "lighter";
+      if (o.kind === "note") {
+        const size = 34 + state.pulse * 10 + Math.sin(o.wobble * 2) * 3;
+        g.drawImage(o.sprite, o.x - size, o.y - size, size * 2, size * 2);
+      } else if (o.kind === "gold") {
+        const size = 54 + state.pulse * 12 + Math.sin(state.time * 5) * 5;
+        g.drawImage(goldGlow, o.x - size, o.y - size, size * 2, size * 2);
+        for (let k = 0; k < 3; k++) {
+          const a = state.time * 2.5 + (k * Math.PI * 2) / 3;
+          g.drawImage(goldGlow, o.x + Math.cos(a) * 22 - 8, o.y + Math.sin(a) * 22 - 8, 16, 16);
+        }
+        g.globalCompositeOperation = "source-over";
+        g.fillStyle = "#fff4c8";
+        starPath(o.x, o.y, 11, state.time * 1.5);
+        g.fill();
+      } else {
+        const size = 32 + state.pulse * 8;
+        g.drawImage(hushGlow, o.x - size, o.y - size, size * 2, size * 2);
+        g.globalCompositeOperation = "source-over";
+        g.strokeStyle = "rgba(235,242,255,0.95)";
+        g.lineWidth = 2;
+        g.beginPath();
+        g.arc(o.x, o.y, 12, 0, Math.PI * 2);
+        g.stroke();
+        g.globalAlpha = 0.5 + 0.5 * Math.sin(state.time * 4);
+        g.beginPath();
+        g.arc(o.x, o.y, 5 + Math.sin(state.time * 4) * 2, 0, Math.PI * 2);
+        g.stroke();
+        g.globalAlpha = 1;
+      }
     }
     g.globalCompositeOperation = "source-over";
   }
 
   function drawHazards() {
     for (const h of state.hazards) {
-      const flicker = 0.6 + Math.random() * 0.4;
-      g.globalAlpha = flicker * 0.7;
+      const doomed = h.doomAt != null;
+      g.globalAlpha = doomed ? 0.5 : (0.6 + Math.random() * 0.4) * 0.7;
       g.globalCompositeOperation = "lighter";
-      g.drawImage(staticGlow, h.x - 30, h.y - 30, 60, 60);
+      g.drawImage(doomed ? hushGlow : staticGlow, h.x - 30, h.y - 30, 60, 60);
       g.globalCompositeOperation = "source-over";
       g.globalAlpha = 1;
-      g.fillStyle = "#3a2f52";
-      g.strokeStyle = COLORS.static;
+      g.fillStyle = doomed ? "#8d8aa8" : "#3a2f52";
+      g.strokeStyle = doomed ? COLORS.hush : COLORS.static;
       g.lineWidth = 1.5;
       g.beginPath();
       const spikes = 9;
       for (let k = 0; k <= spikes * 2; k++) {
         const a = h.spin + (k / (spikes * 2)) * Math.PI * 2;
-        const rad = k % 2 === 0 ? h.r + Math.random() * 4 : h.r * 0.55;
+        const jitter = doomed ? 0 : Math.random() * 4;
+        const rad = k % 2 === 0 ? h.r + jitter : h.r * 0.55;
         const px = h.x + Math.cos(a) * rad, py = h.y + Math.sin(a) * rad;
         if (k === 0) g.moveTo(px, py); else g.lineTo(px, py);
       }
@@ -985,17 +1478,21 @@
   function drawPlayer() {
     if (state.mode !== "play") return;
     if (state.invincible > 0 && Math.floor(state.invincible * 10) % 2 === 0) return;
+    const soloOn = soloActive();
+    const noteCols = noteSprites[movementIdx];
     g.globalCompositeOperation = "lighter";
     player.trail.forEach((p, k) => {
       const f = k / player.trail.length;
-      const size = 6 + f * 14;
-      g.globalAlpha = f * 0.35;
-      g.drawImage(fireflyGlow, p.x - size, p.y - size, size * 2, size * 2);
+      const size = (soloOn ? 10 : 6) + f * 14;
+      g.globalAlpha = f * (soloOn ? 0.6 : 0.35);
+      const sprite = soloOn ? noteCols[k % 3] : fireflyGlow;
+      g.drawImage(sprite, p.x - size, p.y - size, size * 2, size * 2);
     });
     g.globalAlpha = 1;
     const size = 46 + state.pulse * 14 + Math.sin(state.time * 8) * 3;
-    g.drawImage(fireflyGlow, player.x - size, player.y - size, size * 2, size * 2);
+    g.drawImage(soloOn ? goldGlow : fireflyGlow, player.x - size, player.y - size, size * 2, size * 2);
     g.globalCompositeOperation = "source-over";
+
     // Wings
     const flap = Math.sin(state.time * 40) * 0.5;
     g.fillStyle = "rgba(243,236,210,0.55)";
@@ -1004,6 +1501,16 @@
       g.ellipse(player.x + side * 7, player.y - 6, 7, 3.5, side * (0.6 + flap), 0, Math.PI * 2);
       g.fill();
     });
+
+    // A ring that runs down as the solo plays out
+    if (soloOn) {
+      g.strokeStyle = COLORS.gold;
+      g.lineWidth = 2.5;
+      g.lineCap = "round";
+      g.beginPath();
+      g.arc(player.x, player.y, 22, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * soloLeft());
+      g.stroke();
+    }
   }
 
   function drawEffects() {
@@ -1021,10 +1528,18 @@
       g.arc(r.x, r.y, 10 + (1 - r.life) * 50, 0, Math.PI * 2);
       g.stroke();
     }
+    for (const w of state.waves) {
+      g.globalAlpha = Math.max(0, w.life) * 0.7;
+      g.strokeStyle = COLORS.hush;
+      g.lineWidth = 3 + w.life * 5;
+      g.beginPath();
+      g.arc(w.x, w.y, w.r, 0, Math.PI * 2);
+      g.stroke();
+    }
     g.globalCompositeOperation = "source-over";
-    g.font = '600 13px "Martian Mono", monospace';
     g.textAlign = "center";
     for (const f of state.floats) {
+      g.font = f.big ? '20px "Figtree", sans-serif' : '600 13px "Martian Mono", monospace';
       g.globalAlpha = Math.max(0, f.life);
       g.fillStyle = f.color;
       g.fillText(f.text, f.x, f.y);
@@ -1042,13 +1557,24 @@
     drawHazards();
     drawPlayer();
     drawEffects();
-    drawGrass(grassFront, "#070b1f", 1);
+    drawRain();
+    drawGrass(grassFront, css(scene.front), 1);
     g.restore();
 
-    // A soft bloom on every kick drum
-    if (state.pulse > 0 && !reduceMotion) {
-      g.fillStyle = `rgba(127, 224, 207, ${state.pulse * 0.05})`;
-      g.fillRect(0, 0, W, H);
+    // A soft bloom on every kick drum, and a flash for lightning and new movements
+    if (!reduceMotion) {
+      if (state.pulse > 0) {
+        g.fillStyle = css(hexToRgb(MOVEMENTS[movementIdx].notes[0]), state.pulse * 0.05);
+        g.fillRect(0, 0, W, H);
+      }
+      if (state.flash > 0) {
+        g.fillStyle = `rgba(235,240,255,${state.flash * 0.22})`;
+        g.fillRect(0, 0, W, H);
+      }
+      if (soloActive()) {
+        g.fillStyle = "rgba(255,215,106,0.035)";
+        g.fillRect(0, 0, W, H);
+      }
     }
   }
 
@@ -1063,5 +1589,8 @@
   for (let k = 0; k < 8; k++) spawnOrb(); // start with a few notes already drifting
   state.orbs.forEach((o) => { o.x = W * (0.1 + Math.random() * 0.8); o.y = H * (0.1 + Math.random() * 0.7); o.age = 2; });
   requestAnimationFrame(frame);
+
+  // A peek inside for the curious: try fireflyJam.state in the browser console
+  window.fireflyJam = { state, movements: MOVEMENTS };
 })();
 </script>
